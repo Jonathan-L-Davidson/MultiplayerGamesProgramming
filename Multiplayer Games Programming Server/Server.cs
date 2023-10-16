@@ -52,6 +52,13 @@ namespace Multiplayer_Games_Programming_Server
                 StreamReader reader = new StreamReader(stream, Encoding.UTF8);
                 StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
 
+                while ((message = reader.ReadLine()) != null)
+                {
+                    Console.WriteLine($"Recieved: {message}");
+
+                    writer.WriteLine("Hello world!");
+                    writer.Flush();
+                }
             }
             catch (Exception ex)
             {
@@ -59,7 +66,7 @@ namespace Multiplayer_Games_Programming_Server
             }
             finally
             {
-
+                index.Close();
             }
         }
     }
