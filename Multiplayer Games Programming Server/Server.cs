@@ -9,13 +9,17 @@ namespace Multiplayer_Games_Programming_Server
     internal class Server
     {
         TcpListener m_TcpListener;
+        int m_port;
+        IPAddress m_ipAddress;
 
         ConcurrentDictionary<int, ConnectedClient> m_Clients;
 
         public Server(string ipAddress, int port)
         {
-            IPAddress ip = IPAddress.Parse(ipAddress);
-            m_TcpListener = new TcpListener(ip, port);
+            m_ipAddress = IPAddress.Parse(ipAddress);
+            m_port = port;
+            
+            m_TcpListener = new TcpListener(m_ipAddress, m_port);
 
 
         }
