@@ -71,25 +71,27 @@ namespace Multiplayer_Games_Programming_Framework.Core
 				while (m_tcpClient.Connected)
 				{
 					string msg = m_netReader.ReadLine();
+
 					Debug.WriteLine($"Message recieved: {msg}");
 
 				}
-			}
+            }
 			catch (Exception e)
 			{
                 Debug.WriteLine($"TCP Process Error: {e.Message}");
 			}
 		}
 
-		public void TCPSendMessage(string message)
+		public void TCPSendMessage(Packet packet)
 		{
-			m_netWriter.WriteLine(message);
+			m_netWriter.WriteLine(packet.ToJson());
 			m_netWriter.Flush();
 		}
 
 		public void Login()
 		{
-			TCPSendMessage("Login");
+            NETMessage message = new NETMessage($"Hello server!!");
+            TCPSendMessage(message);
 		}
 	}
 }

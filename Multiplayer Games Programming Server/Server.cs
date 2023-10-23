@@ -79,11 +79,40 @@ namespace Multiplayer_Games_Programming_Server
 
             while (client.active)
             {
-                client.Read();
+                string recieved = client.Read();
+                if(recieved != null)
+                {
+                    Console.WriteLine($"Recieved Packet: {recieved}");
+                    Packet? packet = Packet.Deserialise(recieved);
+                    if (packet != null)
+                    {
+                        HandlePacket(packet);
+                    }
+                }
+
             }
 
             client.Close();
 
+        }
+
+        private void HandlePacket(Packet packet)
+        {
+            if (packet == null) { return; };
+
+            switch(packet.m_type)
+            {
+                case PacketType.MSG:
+                    NETMessage msg = (NETMessage)packet;
+                    msg.PrintMessage();
+                    break;
+                case PacketType.NULL:
+                    break;
+                default:
+                    Console.WriteLine($"ERROR: PacketType missing, was: {packet.m_type}");
+                    break;
+
+            }
         }
     }
 }

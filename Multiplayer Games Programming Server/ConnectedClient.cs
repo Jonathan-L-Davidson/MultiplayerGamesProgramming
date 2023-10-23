@@ -58,8 +58,16 @@ namespace Multiplayer_Games_Programming_Server
 
         }
 
-		//public void Send(string message)
-		//{
-		//}
+		public void Send(Packet packet)
+		{
+            string data = PreparePacket(packet);
+            m_netWriter.WriteLine(data);
+            m_netWriter.Flush();
+		}
+
+        private string PreparePacket(Packet packet)
+        {
+            return packet.ToJson();
+        }
 	}
 }
