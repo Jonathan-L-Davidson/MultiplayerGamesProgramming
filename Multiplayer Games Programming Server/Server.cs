@@ -8,9 +8,12 @@ namespace Multiplayer_Games_Programming_Server
 {
     internal class Server
     {
+        
         TcpListener m_TcpListener;
         int m_port;
         IPAddress m_ipAddress;
+
+        int m_maxClients = 10;
 
         ConcurrentDictionary<int, ConnectedClient> m_Clients;
 
@@ -21,6 +24,7 @@ namespace Multiplayer_Games_Programming_Server
             
             m_TcpListener = new TcpListener(m_ipAddress, m_port);
 
+            m_Clients = new ConcurrentDictionary<int, ConnectedClient>();
 
         }
 
@@ -30,11 +34,30 @@ namespace Multiplayer_Games_Programming_Server
             {
                 m_TcpListener.Start();
                 Console.WriteLine($"Server started on {m_TcpListener.LocalEndpoint}");
+                bool active = true;
 
-                Socket socket = m_TcpListener.AcceptSocket();
-                Console.WriteLine("Connection made");
+                while (active)
+                {
+                    Socket socket = m_TcpListener.AcceptSocket();
+                    Console.WriteLine($"Connection made from {socket.RemoteEndPoint}");
 
-                ClientMethod(socket);
+                    int newID = 0;
+                    ConnectedClient client = new ConnectedClient(socket);
+                    
+                    // There isn't a case where client isn't added to this list and continues. Atleast I hope so, we can assume lines after this will continue.
+                    while (!m_Clients.TryAdd(newID, client))
+                    {
+                        if(newID > m_maxClients)
+                        {
+                            client.Close();
+                            return;
+                        }
+                        newID++;
+                    }
+
+                    Thread clientThread = new Thread(new ParameterizedThreadStart(ClientMethod));
+                    clientThread.Start(newID);
+                }
             }
             catch (Exception ex)
             {
@@ -47,31 +70,20 @@ namespace Multiplayer_Games_Programming_Server
             m_TcpListener?.Stop();
         }
 
-        private void ClientMethod(Socket index)
+        private void ClientMethod(object index)
         {
-            try
-            {
-                string message;
-                NetworkStream stream = new NetworkStream(index, false);
-                StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-                StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
 
-                while ((message = reader.ReadLine()) != null)
-                {
-                    Console.WriteLine($"Recieved: {message}");
+            ConnectedClient? client = m_Clients.ElementAt((int)index).Value;
+            client.id = (int)index;
+            if(client == null) { return; }
 
-                    writer.WriteLine("Hello world!");
-                    writer.Flush();
-                }
-            }
-            catch (Exception ex)
+            while (client.active)
             {
-                Console.WriteLine(ex.Message);
+                client.Read();
             }
-            finally
-            {
-                index.Close();
-            }
+
+            client.Close();
+
         }
     }
 }

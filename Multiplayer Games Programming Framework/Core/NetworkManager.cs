@@ -51,7 +51,7 @@ namespace Multiplayer_Games_Programming_Framework.Core
 				return true;
 			} catch(Exception e)
 			{
-				Console.WriteLine($"Error while connecting: {e.Message}");
+                Debug.WriteLine($"Error while connecting: {e.Message}");
 			}
 
 			return false;
@@ -71,13 +71,13 @@ namespace Multiplayer_Games_Programming_Framework.Core
 				while (m_tcpClient.Connected)
 				{
 					string msg = m_netReader.ReadLine();
-					Console.WriteLine($"Message recieved: {msg}");
+					Debug.WriteLine($"Message recieved: {msg}");
 
 				}
 			}
 			catch (Exception e)
 			{
-				Console.WriteLine($"TCP Process Error: {e.Message}");
+                Debug.WriteLine($"TCP Process Error: {e.Message}");
 			}
 		}
 
