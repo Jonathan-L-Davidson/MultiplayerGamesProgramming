@@ -56,6 +56,7 @@ namespace Multiplayer_Games_Programming_Server
                     }
 
                     Thread clientThread = new Thread(new ParameterizedThreadStart(ClientMethod));
+                    clientThread.Name = $"Client {newID}";
                     clientThread.Start(newID);
                 }
             }

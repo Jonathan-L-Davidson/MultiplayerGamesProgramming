@@ -44,7 +44,7 @@ namespace Multiplayer_Games_Programming_Framework
 			//if (NetworkManager.m_Instance.m_Index == 0)
 			{
 				m_PlayerPaddle = GameObject.Instantiate<PaddleGO>(this, new Transform(new Vector2(100, 500), new Vector2(5, 20), 0));
-				m_PlayerPaddle.AddComponent(new PaddleController(m_PlayerPaddle));
+				m_PlayerPaddle.AddComponent(new PlayerController(m_PlayerPaddle));
 
 				m_RemotePaddle = GameObject.Instantiate<PaddleGO>(this, new Transform(new Vector2(screenWidth - 100, 500), new Vector2(5, 20), 0));
 				m_RemotePaddle.AddComponent(new PaddleNetworkController(m_RemotePaddle, 1));

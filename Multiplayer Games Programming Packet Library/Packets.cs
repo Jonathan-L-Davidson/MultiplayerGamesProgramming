@@ -1,5 +1,6 @@
 ﻿using Multiplayer_Games_Programming_Packet_Library;
 using System.Net;
+using System.Numerics;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,6 +11,8 @@ namespace Multiplayer_Games_Programming_Packet_Library
 	{
 		NULL = 0,
 		MSG,
+        POSITION,
+        PLAYERMOVE,
 	}
 
 	public class Packet
@@ -55,6 +58,14 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<NETMessage>(root.GetRawText(), options);
                     }
+                    if (typeProperty.GetByte() == (byte)PacketType.POSITION)
+                    {
+                        return JsonSerializer.Deserialize<NETPosition>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERMOVE)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerMove>(root.GetRawText(), options);
+                    }
 
                     //if (typeProperty.GetByte() == (byte)AnimalType.CAT)
                     //{
@@ -76,21 +87,50 @@ namespace Multiplayer_Games_Programming_Packet_Library
     public class NETMessage : Packet
     {
         [JsonPropertyName("Message")]
-        public string message;
+        public string? message;
 
         public NETMessage()
         {
             m_type = PacketType.MSG;
         }
 
-        public NETMessage(string msg)
+        public NETMessage(string message)
         {
             m_type = PacketType.MSG;
-            message = msg;
+            this.message = message;
         }
 
         public void PrintMessage() { Console.WriteLine(message); }
     }
+    public class NETPosition : Packet
+    {
+        [JsonPropertyName("Position")]
+        public Vector2 position;
+        public object objRef;
+
+        public NETPosition(Vector2 position, object objRef)
+        {
+            m_type = PacketType.POSITION;
+            this.position = position;
+            this.objRef = objRef;
+        }
+    }
+
+    public class NETPlayerMove : Packet
+    {
+        [JsonPropertyName("MovementLoop")]
+        public Vector2 movementLoop;
+        [JsonPropertyName("PlayerID")]
+        public int playerID;
+
+        public NETPlayerMove(Vector2 position, int playerID)
+        {
+            m_type = PacketType.PLAYERMOVE;
+            this.movementLoop = position;
+            this.playerID = playerID;
+        }
+    }
+
 
 }
 
