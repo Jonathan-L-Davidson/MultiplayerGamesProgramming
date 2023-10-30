@@ -14,19 +14,22 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
     {
         int playerID;
         float m_Speed;
+        float m_maxSpeed;
         Rigidbody m_Rigidbody;
-
         Vector2 m_movementLoop;
 
         public PlayerController(GameObject gameObject) : base(gameObject)
         {
-            m_Speed = 100;
+            m_Speed = 40;
+            m_maxSpeed = 50;
         }
 
         protected override void Start(float deltaTime)
         {
             // Start player info here.
             m_Rigidbody = m_GameObject.GetComponent<Rigidbody>();
+            m_Rigidbody.m_Body.Mass = 20;
+            m_Rigidbody.m_Body.BodyType = nkast.Aether.Physics2D.Dynamics.BodyType.Dynamic;
         }
 
         protected override void Update(float deltaTime)
@@ -34,7 +37,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
             CheckInput();
 
             Vector2 Movement = (m_Transform.Right * m_movementLoop.X) + (m_Transform.Up * m_movementLoop.Y);
-            m_Rigidbody.m_Body.LinearVelocity = Movement * m_Speed * deltaTime;
+            m_Rigidbody.m_Body.ApplyLinearImpulse(Movement * m_Speed * deltaTime);
         }
 
         private void CheckInput()
@@ -63,7 +66,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
             loop.X = m_movementLoop.X;
             loop.Y = m_movementLoop.Y;
 
-            NETPlayerMove movePacket = new NETPlayerMove(loop, playerID);
+            NETPlayerMove movePacket = new NETPlayerMove(loop, m_GameObject.m_Name);
             NetworkManager.m_Instance.TCPSendMessage(movePacket);
         }
     }

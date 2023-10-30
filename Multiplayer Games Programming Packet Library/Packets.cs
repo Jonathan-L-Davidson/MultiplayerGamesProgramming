@@ -118,15 +118,32 @@ namespace Multiplayer_Games_Programming_Packet_Library
 
     public class NETPlayerMove : Packet
     {
-        [JsonPropertyName("MovementLoop")]
-        public Vector2 movementLoop;
+        [JsonPropertyName("X")]
+        public float x;
+        [JsonPropertyName("Y")]
+        public float y;
+        
         [JsonPropertyName("PlayerID")]
-        public int playerID;
+        public string playerID;
 
-        public NETPlayerMove(Vector2 position, int playerID)
+        public NETPlayerMove()
         {
             m_type = PacketType.PLAYERMOVE;
-            this.movementLoop = position;
+        }
+
+        public NETPlayerMove(Vector2 position, string playerID)
+        {
+            m_type = PacketType.PLAYERMOVE;
+            this.x = position.X;
+            this.y = position.Y;
+            this.playerID = playerID;
+        }
+
+        public NETPlayerMove(float x, float y, string playerID)
+        {
+            m_type = PacketType.PLAYERMOVE;
+            this.x = x;
+            this.y = y;
             this.playerID = playerID;
         }
     }
