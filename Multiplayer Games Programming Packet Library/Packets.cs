@@ -13,7 +13,8 @@ namespace Multiplayer_Games_Programming_Packet_Library
 		MSG,
         POSITION,
         PLAYERMOVE,
-	}
+        OBJUPDATE,
+    }
 
 	public class Packet
 	{
@@ -102,6 +103,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
 
         public void PrintMessage() { Console.WriteLine(message); }
     }
+
     public class NETPosition : Packet
     {
         [JsonPropertyName("Position")]

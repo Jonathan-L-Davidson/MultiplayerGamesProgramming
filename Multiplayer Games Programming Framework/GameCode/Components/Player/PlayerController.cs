@@ -8,36 +8,26 @@ using System.Threading.Tasks;
 using Multiplayer_Games_Programming_Framework.Core;
 using Multiplayer_Games_Programming_Packet_Library;
 
-namespace Multiplayer_Games_Programming_Framework.GameCode.Components
+namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
 {
     internal class PlayerController : Component
     {
         int playerID;
-        float m_Speed;
-        float m_maxSpeed;
-        Rigidbody m_Rigidbody;
-        Vector2 m_movementLoop;
 
+        PlayerEntity player;
         public PlayerController(GameObject gameObject) : base(gameObject)
         {
-            m_Speed = 40;
-            m_maxSpeed = 50;
+            
         }
 
         protected override void Start(float deltaTime)
         {
-            // Start player info here.
-            m_Rigidbody = m_GameObject.GetComponent<Rigidbody>();
-            m_Rigidbody.m_Body.Mass = 20;
-            m_Rigidbody.m_Body.BodyType = nkast.Aether.Physics2D.Dynamics.BodyType.Dynamic;
+            player = m_GameObject.GetComponent<PlayerEntity>();
         }
 
         protected override void Update(float deltaTime)
         {
             CheckInput();
-
-            Vector2 Movement = (m_Transform.Right * m_movementLoop.X) + (m_Transform.Up * m_movementLoop.Y);
-            m_Rigidbody.m_Body.ApplyLinearImpulse(Movement * m_Speed * deltaTime);
         }
 
         private void CheckInput()
@@ -49,25 +39,25 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components
             if (Keyboard.GetState().IsKeyDown(Keys.S)) { input.Y = 1; }     // Down
             if (Keyboard.GetState().IsKeyDown(Keys.D)) { input.X = 1; }     // Right
 
-            if(input != m_movementLoop)
+            if (input != player.m_movementLoop)
             {
                 UpdateMovement(input);
             }
         }
         private void UpdateMovement(Vector2 input)
         {
-            m_movementLoop = input;
+            player.SetMovementLoop(input);
             UpdateNetworkMovement();
         }
-
         private void UpdateNetworkMovement()
         {
             System.Numerics.Vector2 loop;
-            loop.X = m_movementLoop.X;
-            loop.Y = m_movementLoop.Y;
+            loop.X = player.m_movementLoop.X;
+            loop.Y = player.m_movementLoop.Y;
 
             NETPlayerMove movePacket = new NETPlayerMove(loop, m_GameObject.m_Name);
             NetworkManager.m_Instance.TCPSendMessage(movePacket);
         }
+
     }
 }

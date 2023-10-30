@@ -8,12 +8,13 @@ using Multiplayer_Games_Programming_Packet_Library;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using System.Linq.Expressions;
+using Myra;
 
 namespace Multiplayer_Games_Programming_Framework.Core
 {
 	internal class NetworkManager
 	{
-		private static NetworkManager Instance;
+        private static NetworkManager Instance;
 
 		public static NetworkManager m_Instance
 		{
@@ -73,6 +74,9 @@ namespace Multiplayer_Games_Programming_Framework.Core
 					string msg = m_netReader.ReadLine();
 
 					Debug.WriteLine($"Message recieved: {msg}");
+					Packet packet = DeserialisePacket(msg);
+
+					HandlePacket(packet);
 
 				}
             }
@@ -88,7 +92,23 @@ namespace Multiplayer_Games_Programming_Framework.Core
 			m_netWriter.Flush();
 		}
 
-		public void Login()
+		private Packet DeserialisePacket(string msg)
+		{
+			return Packet.Deserialise(msg);
+		}
+
+		private void HandlePacket(Packet packet)
+		{
+			switch (packet.m_type)
+			{
+				case(PacketType.OBJUPDATE):
+					
+					break;
+			}
+
+        }
+
+        public void Login()
 		{
             NETMessage message = new NETMessage($"Hello server!!");
             TCPSendMessage(message);

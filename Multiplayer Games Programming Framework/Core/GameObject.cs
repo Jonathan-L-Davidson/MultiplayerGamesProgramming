@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using nkast.Aether.Physics2D.Dynamics.Contacts;
 using nkast.Aether.Physics2D.Dynamics;
+using Multiplayer_Games_Programming_Framework.Core;
 
 namespace Multiplayer_Games_Programming_Framework
 {
@@ -30,8 +31,8 @@ namespace Multiplayer_Games_Programming_Framework
             m_Scene = scene;
             m_Transform = transform;
             m_GameComponents = new List<Component>();
-		}
-
+        }
+		
         ~GameObject()
         {
 			Console.WriteLine(m_Name + " destroyed");
