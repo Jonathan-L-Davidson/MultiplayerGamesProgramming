@@ -18,7 +18,6 @@ namespace Multiplayer_Games_Programming_Server
         int m_maxClients = 10;
 
         ConcurrentDictionary<int, ConnectedClient> m_Clients;
-        List<ConnectedClient> m_playingClients;
 
         List<GameObject> m_gameObjects;
 
@@ -29,7 +28,8 @@ namespace Multiplayer_Games_Programming_Server
             
             m_TcpListener = new TcpListener(m_ipAddress, m_port);
 
-            m_Clients = new ConcurrentDictionary<int, ConnectedClient>()
+            m_Clients = new();
+            m_gameObjects = new();
         }
 
         public void Start()
@@ -123,7 +123,6 @@ namespace Multiplayer_Games_Programming_Server
                     NETPlayerPlay start = (NETPlayerPlay)packet;
                     if(m_Clients[start.playerID].StartGame() == true)
                     {
-                        m_playingClients.Add(m_Clients[start.playerID]);
                         SceneSync(m_Clients[start.playerID]);
                     }
                     break;
@@ -174,14 +173,16 @@ namespace Multiplayer_Games_Programming_Server
 
         private void SceneSync(ConnectedClient client)
         {
-            lock (m_gameObjects) {
-                foreach (GameObject obj in m_gameObjects)
-                {
-                    NETObjectUpdate updateObj = new NETObjectUpdate(obj.GetData());
-                    client.Send(updateObj);
+            if (m_gameObjects.Count > 0)
+            {
+                lock (m_gameObjects) {
+                    foreach (GameObject obj in m_gameObjects)
+                    {
+                        NETObjectUpdate updateObj = new NETObjectUpdate(obj.GetData());
+                        client.Send(updateObj);
+                    }
                 }
             }
-
             lock (m_Clients) {
                 foreach(ConnectedClient connectedClient in m_Clients.Values)
                 {

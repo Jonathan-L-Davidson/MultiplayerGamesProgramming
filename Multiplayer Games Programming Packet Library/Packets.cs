@@ -98,6 +98,14 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<NETPlayerLogin>(root.GetRawText(), options);
                     }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERPLAY)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerPlay>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERUPDATE)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerUpdate>(root.GetRawText(), options);
+                    }
                     if (typeProperty.GetByte() == (byte)PacketType.PLAYERCREATE)
                     {
                         return JsonSerializer.Deserialize<NETPlayerPlay>(root.GetRawText(), options);

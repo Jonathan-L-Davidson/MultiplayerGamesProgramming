@@ -21,8 +21,6 @@ internal class NetworkManager
 	public Scene activeScene;
 	public int playerID = -1;
 
-	public Dictionary<int, PlayerNetwork> players = new Dictionary<int, PlayerNetwork>();
-
 	public static NetworkManager m_Instance
 	{
 		get
@@ -119,7 +117,7 @@ internal class NetworkManager
 				break;
             case (PacketType.PLAYERPLAY):
                 NETPlayerPlay playPacket = (NETPlayerPlay)packet;
-                HandlePlayerJoin(playPacket);
+                //HandlePlayerJoin(playPacket);
                 break;
             case (PacketType.PLAYERUPDATE):
                 NETPlayerUpdate updatePlayerPacket = (NETPlayerUpdate)packet;
@@ -147,7 +145,9 @@ internal class NetworkManager
 
 	private void HandePlayerMovement(NETPlayerMove movePacket)
 	{
-		PlayerNetwork playerRef = players[movePacket.playerID];
+		GameScene gameScene = (GameScene)activeScene;
+		Dictionary<int, PlayerEntity> players = gameScene.GetPlayers();
+        PlayerNetwork playerRef = players[movePacket.playerID].m_GameObject.GetComponent<PlayerNetwork>();
 		if (playerRef != null)
 		{
 			playerRef.playerInput = new Vector2(movePacket.x, movePacket.y);
@@ -157,20 +157,45 @@ internal class NetworkManager
 
 	private void UpdatePlayer(NETPlayerUpdate playerUpdate)
 	{
-		// Check if ID is in the player entity list.
-		// if not, create a new player.
-		
-		// Set data from playerUpdate to player, using a lock to prevent any conflict in data.
 
+		GameScene gameScene = (GameScene)activeScene;
+
+		if(gameScene == null) { return; }
+
+		Dictionary<int, PlayerEntity> players = gameScene.GetPlayers();
+        // Check if ID is in the player entity list.
+        // if not, create a new player.
+
+        PlayerEntity entity = players[playerUpdate.data.playerID];
+
+		if(entity == null)
+		{
+			CreateNetworkPlayer(playerUpdate.data);
+		}
+
+		// Set data from playerUpdate to player, using a lock to prevent any conflict in data.
+		
 	}
 
-	private void CreateNetworkPlayer(int id, Transform pos, PlayerData playerInfo)
+	private PlayerEntity CreateNetworkPlayer(PlayerData data)
 	{
-		PlayerGO newPlayer = GameObject.Instantiate<PlayerGO>(activeScene, pos);
+		Vector2 pos = new Vector2(data.x, data.y);
+		Transform trans = new Transform();
+		trans.Position = pos;
+		
+		PlayerGO newPlayer = GameObject.Instantiate<PlayerGO>(activeScene, trans);
 
-		newPlayer.AddComponent(new PlayerEntity(newPlayer));
-		newPlayer.AddComponent(new PlayerNetwork(newPlayer, playerInfo));
+		PlayerEntity entity = new PlayerEntity(newPlayer);
+		newPlayer.AddComponent(entity);
+		newPlayer.AddComponent(new PlayerNetwork(newPlayer, data));
 
+		GameScene gameScene = (GameScene)activeScene;
+		if(gameScene == null) { return null; }
+
+        Dictionary<int, PlayerEntity> players = gameScene.GetPlayers();
+        players.Add(data.playerID, entity);
+
+		return entity;
 	}
 
 	//private void CreateNetworkPlayer(int id)

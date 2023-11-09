@@ -16,6 +16,8 @@ namespace Multiplayer_Games_Programming_Framework
 	{
 		List<GameObject> m_GameObjects = new();
 
+		Dictionary<int, PlayerEntity> m_players = new();
+
 		BallGO m_Ball;
 		PlayerGO m_PlayerPaddle;
 
@@ -136,5 +138,7 @@ namespace Multiplayer_Games_Programming_Framework
 					break;
 			}
 		}
-	}
+
+		public Dictionary<int, PlayerEntity> GetPlayers() { return m_players; }
+    }
 }

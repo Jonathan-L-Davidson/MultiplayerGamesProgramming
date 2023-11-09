@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Multiplayer_Games_Programming_Framework.Core;
 using Multiplayer_Games_Programming_Packet_Library;
-
+using Multiplayer_Games_Programming_Framework.GameCode.Components.Player;
 
 namespace Multiplayer_Games_Programming_Framework
 {
@@ -41,6 +41,37 @@ namespace Multiplayer_Games_Programming_Framework
         public void SetMovementLoop(Vector2 loop)
         {
             m_movementLoop = loop;
+        }
+
+        public void NetUpdate()
+        {
+            lock (this)
+            {
+                string spriteID = this.m_GameObject.GetComponent<SpriteRenderer>().m_Texture.ToString();
+                PlayerData data = new PlayerData
+                {
+                    playerID = GetID(),
+                    x = this.m_Transform.Position.X,
+                    y = this.m_Transform.Position.Y,
+                    spriteID = spriteID,
+                    health = this.health,
+                    isPlaying = true
+                };
+
+                NETPlayerUpdate playerUpdate = new NETPlayerUpdate(data);
+                NetworkManager.m_Instance.TCPSendMessage(playerUpdate);
+            }
+        }
+
+        public int GetID()
+        {
+            PlayerController controller = this.m_GameObject.GetComponent<PlayerController>();
+            PlayerNetwork networkController = this.m_GameObject.GetComponent<PlayerNetwork>();
+
+            if(controller != null) { return NetworkManager.m_Instance.playerID; }
+            if(networkController != null) { return networkController.playerID; }
+
+            return -1; // error out.
         }
     }
 }

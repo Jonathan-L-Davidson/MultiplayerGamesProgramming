@@ -12,15 +12,15 @@ namespace Multiplayer_Games_Programming_Framework
 {
     internal class PlayerNetwork : Component
     {
-        int playerID;
+        public int playerID;
 
         PlayerEntity player;
         PlayerData initPlayerData;
 
         public Vector2 playerInput;
-        public PlayerNetwork(GameObject gameObject, PlayerData playerInfo) : base(gameObject)
+        public PlayerNetwork(GameObject gameObject, PlayerData data) : base(gameObject)
         {
-            this.initPlayerData = playerInfo;
+            this.initPlayerData = data;
         }
         protected override void Start(float deltaTime)
         {
@@ -29,9 +29,9 @@ namespace Multiplayer_Games_Programming_Framework
             {
                 throw new Exception("PlayerEntity not found!");
             }
-            NetworkManager.m_Instance.players[playerID] = this;
             player.health = initPlayerData.health;
             player.m_Transform.Position = new Vector2(initPlayerData.x, initPlayerData.y);
+            player.NetUpdate();
         }
 
         protected override void Update(float deltaTime)
