@@ -55,7 +55,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
             loop.X = player.m_movementLoop.X;
             loop.Y = player.m_movementLoop.Y;
 
-            NETPlayerMove movePacket = new NETPlayerMove(loop, m_GameObject.m_Name);
+            NETPlayerMove movePacket = new NETPlayerMove(loop, NetworkManager.m_Instance.playerID);
             NetworkManager.m_Instance.TCPSendMessage(movePacket);
         }
 

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -14,8 +16,14 @@ namespace Multiplayer_Games_Programming_Server
         StreamReader m_netReader;
         StreamWriter m_netWriter;
 
-        public int id { get; set; }
 
+        public bool playingGame = false;
+
+        PlayerData m_playerData;
+
+        public void SetID(int id) { m_playerData.playerID = id; }
+        public int GetID() {  return m_playerData.playerID; }
+        public PlayerData GetData() { return m_playerData; }
         public bool active { get; private set; } = true;
 
         public ConnectedClient(object socket)
@@ -60,14 +68,33 @@ namespace Multiplayer_Games_Programming_Server
 
 		public void Send(Packet packet)
 		{
-            string data = PreparePacket(packet);
-            m_netWriter.WriteLine(data);
-            m_netWriter.Flush();
+            try
+            {
+                string data = PreparePacket(packet);
+                m_netWriter.WriteLine(data);
+                m_netWriter.Flush();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ERROR: " + ex.Message);
+                return;
+            }
 		}
 
         private string PreparePacket(Packet packet)
         {
             return packet.ToJson();
         }
-	}
+
+        public bool StartGame(List<ConnectedClient> clients)
+        {
+            NETPlayerUpdate createCharacter = new NETPlayerUpdate();
+            createCharacter.data = GetData();
+
+            Send(createCharacter);
+            
+            playingGame = true;
+            return true;
+        }
+    }
 }

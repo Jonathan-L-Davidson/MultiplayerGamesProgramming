@@ -7,16 +7,38 @@ using System.Text.Json.Serialization;
 
 namespace Multiplayer_Games_Programming_Packet_Library
 {
-	public enum PacketType
+    public struct PlayerData
+    {
+        public int playerID;
+        public float x;
+        public float y;
+        public string spriteID;
+        public float health;
+    }
+
+    public struct ObjData
+    {
+        public int objID;
+        public float x;
+        public float y;
+        public string spriteID;
+        public KeyValuePair<string, string> optionalData;
+    }
+
+    public enum PacketType
 	{
 		NULL = 0,
 		MSG,
-        POSITION,
         PLAYERMOVE,
+        PLAYERLOGIN,
+        PLAYERPLAY,
+        PLAYERUPDATE,
+        PLAYERCREATE,
         OBJUPDATE,
     }
 
-	public class Packet
+    #region "Packet"
+    public class Packet
 	{
 		[JsonPropertyName("Type")]
 		public PacketType m_type { get; set; } = PacketType.NULL;
@@ -34,18 +56,26 @@ namespace Multiplayer_Games_Programming_Packet_Library
 
         public static Packet? Deserialise(string json)
         {
-            var options = new JsonSerializerOptions
+            try
             {
-                Converters = { new PacketConverter() },
-                IncludeFields = true,
-            };
+                var options = new JsonSerializerOptions
+                {
+                    Converters = { new PacketConverter() },
+                    IncludeFields = true,
+                };
 
-            return JsonSerializer.Deserialize<Packet>(json, options);
+                return JsonSerializer.Deserialize<Packet>(json, options);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ERROR: " + ex.ToString());
+                return new Packet();
+            }
         }
     }
+    #endregion
 
-
-
+    #region "Packet Conversion"
     class PacketConverter : JsonConverter<Packet>
     {
         public override Packet? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -67,12 +97,22 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<NETPlayerMove>(root.GetRawText(), options);
                     }
-
-                    //if (typeProperty.GetByte() == (byte)AnimalType.CAT)
-                    //{
-                    //    return JsonSerializer.Deserialize<Cat>(root.GetRawText(), options);
-                    //}
-                    // Add more types here
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERLOGIN)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerLogin>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERLIST)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerList>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERCREATE)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerCreate>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERSTART)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerPlay>(root.GetRawText(), options);
+                    }
                 }
             }
 
@@ -84,7 +124,9 @@ namespace Multiplayer_Games_Programming_Packet_Library
             JsonSerializer.Serialize(writer, value, value.GetType(), options);
         }
     }
+    #endregion
 
+    #region "Message Packet"
     public class NETMessage : Packet
     {
         [JsonPropertyName("Message")]
@@ -103,21 +145,9 @@ namespace Multiplayer_Games_Programming_Packet_Library
 
         public void PrintMessage() { Console.WriteLine(message); }
     }
+    #endregion "Message Packet"
 
-    public class NETPosition : Packet
-    {
-        [JsonPropertyName("Position")]
-        public Vector2 position;
-        public object objRef;
-
-        public NETPosition(Vector2 position, object objRef)
-        {
-            m_type = PacketType.POSITION;
-            this.position = position;
-            this.objRef = objRef;
-        }
-    }
-
+    #region "Player Movement Packet"
     public class NETPlayerMove : Packet
     {
         [JsonPropertyName("X")]
@@ -126,14 +156,14 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public float y;
         
         [JsonPropertyName("PlayerID")]
-        public string playerID;
+        public int playerID;
 
         public NETPlayerMove()
         {
             m_type = PacketType.PLAYERMOVE;
         }
 
-        public NETPlayerMove(Vector2 position, string playerID)
+        public NETPlayerMove(Vector2 position, int playerID)
         {
             m_type = PacketType.PLAYERMOVE;
             this.x = position.X;
@@ -141,7 +171,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
             this.playerID = playerID;
         }
 
-        public NETPlayerMove(float x, float y, string playerID)
+        public NETPlayerMove(float x, float y, int playerID)
         {
             m_type = PacketType.PLAYERMOVE;
             this.x = x;
@@ -149,7 +179,86 @@ namespace Multiplayer_Games_Programming_Packet_Library
             this.playerID = playerID;
         }
     }
+    #endregion
+
+    #region "Player Login Packet"
+    public class NETPlayerLogin : Packet
+    {
+        [JsonPropertyName("PlayerID")]
+        public int playerID;
+
+        public NETPlayerLogin()
+        {
+            m_type = PacketType.PLAYERLOGIN;
+        }
+
+        public NETPlayerLogin(int playerID)
+        {
+            m_type = PacketType.PLAYERLOGIN;
+            this.playerID = playerID;
+        }
+
+    }
+    #endregion
+
+    #region "Player Update Packet"
+    public class NETPlayerUpdate : Packet
+    {
+        [JsonPropertyName("Data")]
+        public PlayerData data;
+
+        public NETPlayerUpdate()
+        {
+            m_type = PacketType.PLAYERUPDATE;
+        }
+
+        public NETPlayerUpdate(PlayerData data)
+        {
+            m_type = PacketType.PLAYERUPDATE;
+            this.data = data;
+        }
+
+    }
+    #endregion
+
+    #region "Player Play Packet"
+    public class NETPlayerPlay : Packet
+    {
+        [JsonPropertyName("PlayerID")]
+        public int playerID;
+
+        public NETPlayerPlay()
+        {
+            m_type = PacketType.PLAYERPLAY;
+        }
+
+        public NETPlayerPlay(int playerID)
+        {
+            m_type = PacketType.PLAYERPLAY;
+            this.playerID = playerID;
+        }
+
+    }
+    #endregion
+
+    #region "Game Object Update Packet"
+    public class NETObjectUpdate : Packet
+    {
+        [JsonPropertyName("Data")]
+        public ObjData data;
 
 
+        public NETObjectUpdate()
+        {
+            m_type = PacketType.OBJUPDATE;
+        }
+
+        public NETObjectUpdate(ObjData data)
+        {
+            m_type = PacketType.OBJUPDATE;
+            this.data = data;
+        }
+
+    }
+    #endregion
 }
-
