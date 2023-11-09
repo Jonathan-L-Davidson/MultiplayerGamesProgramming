@@ -87,7 +87,7 @@ namespace Multiplayer_Games_Programming_Server
             while (client.active)
             {
                 string recieved = client.Read();
-                if(recieved != null)
+                if(recieved != null && recieved.Length > 0)
                 {
                     Console.WriteLine($"Recieved Packet: {recieved}");
                     Packet? packet = Packet.Deserialise(recieved);
@@ -99,7 +99,8 @@ namespace Multiplayer_Games_Programming_Server
 
             }
 
-            client.Close();
+            m_Clients.Remove(client.GetID(), out client);
+            client?.Close();
 
         }
 
@@ -121,10 +122,16 @@ namespace Multiplayer_Games_Programming_Server
                     break;
                 case PacketType.PLAYERPLAY:
                     NETPlayerPlay start = (NETPlayerPlay)packet;
-                    if(m_Clients[start.playerID].StartGame() == true)
+                    ConnectedClient client = m_Clients[start.playerID];
+                    if (client.StartGame(start) == true)
                     {
                         SceneSync(m_Clients[start.playerID]);
                     }
+                    RelayPacket(new NETPlayerCreate(client.GetData()), start.playerID); // TODO create netplayercreate again, make an new handler
+                    break;
+                case PacketType.PLAYERUPDATE:
+                    NETPlayerUpdate update = (NETPlayerUpdate)packet;
+                    RelayPacket(update);
                     break;
                 default:
                     Console.WriteLine($"ERROR: PacketType missing, was: {packet.m_type}");

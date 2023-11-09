@@ -60,6 +60,8 @@ namespace Multiplayer_Games_Programming_Server
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                active = false;
+                return "";
             }
 
             return "";
@@ -86,15 +88,11 @@ namespace Multiplayer_Games_Programming_Server
             return packet.ToJson();
         }
 
-        public bool StartGame()
+        public bool StartGame(NETPlayerPlay start)
         {
             lock (this)
             {
-                NETPlayerUpdate createCharacter = new NETPlayerUpdate();
-                createCharacter.data = GetData();
-
-                Send(createCharacter);
-
+                m_playerData = start.data;
                 SetPlaying(true);
                 return true;
             }

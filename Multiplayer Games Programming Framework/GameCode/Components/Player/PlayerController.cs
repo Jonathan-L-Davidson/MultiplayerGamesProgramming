@@ -23,6 +23,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
         protected override void Start(float deltaTime)
         {
             player = m_GameObject.GetComponent<PlayerEntity>();
+            playerID = NetworkManager.m_Instance.playerID;
         }
 
         protected override void Update(float deltaTime)

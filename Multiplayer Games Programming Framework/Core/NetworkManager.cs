@@ -166,11 +166,11 @@ internal class NetworkManager
         // Check if ID is in the player entity list.
         // if not, create a new player.
 
-        PlayerEntity entity = players[playerUpdate.data.playerID];
+        PlayerEntity entity = players.ElementAt(playerUpdate.data.playerID).Value;
 
 		if(entity == null)
 		{
-			CreateNetworkPlayer(playerUpdate.data);
+			return;
 		}
 
 		// Set data from playerUpdate to player, using a lock to prevent any conflict in data.

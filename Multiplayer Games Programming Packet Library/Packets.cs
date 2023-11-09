@@ -223,16 +223,19 @@ namespace Multiplayer_Games_Programming_Packet_Library
     {
         [JsonPropertyName("PlayerID")]
         public int playerID;
+        [JsonPropertyName("Data")]
+        PlayerData data;
 
         public NETPlayerPlay()
         {
             m_type = PacketType.PLAYERPLAY;
         }
 
-        public NETPlayerPlay(int playerID)
+        public NETPlayerPlay(int playerID, PlayerData data)
         {
             m_type = PacketType.PLAYERPLAY;
             this.playerID = playerID;
+            this.data = data;
         }
 
     }

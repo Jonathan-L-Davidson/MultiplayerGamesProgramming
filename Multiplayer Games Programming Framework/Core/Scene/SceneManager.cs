@@ -40,6 +40,7 @@ namespace Multiplayer_Games_Programming_Framework
         public void LoadScene(Scene scene)
         {
             m_ActiveScene = scene;
+            NetworkManager.m_Instance.activeScene = m_ActiveScene;
             m_ActiveScene.LoadContent();
         }
 

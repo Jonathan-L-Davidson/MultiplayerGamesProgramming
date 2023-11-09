@@ -32,6 +32,7 @@ namespace Multiplayer_Games_Programming_Framework
 		public GameScene(SceneManager manager) : base(manager)
 		{
 			m_GameModeState = GameModeState.AWAKE;
+			m_players = new();
 		}
 
 		public override void LoadContent()
@@ -41,15 +42,10 @@ namespace Multiplayer_Games_Programming_Framework
 			float screenWidth = Constants.m_ScreenWidth;
 			float screenHeight = Constants.m_ScreenHeight;
 
-			m_Ball = GameObject.Instantiate<BallGO>(this, new Transform(new Vector2(screenWidth / 2, screenHeight / 2), new Vector2(1, 1), 0));
-			m_BallController = m_Ball.GetComponent<BallControllerComponent>();
-
-			//if (NetworkManager.m_Instance.m_Index == 0)
-			{
-				m_PlayerPaddle = GameObject.Instantiate<PlayerGO>(this, new Transform(new Vector2(100, 500), new Vector2(5, 20), 0));
-				m_PlayerPaddle.AddComponent(new PlayerEntity(m_PlayerPaddle));
-				m_PlayerPaddle.AddComponent(new PlayerController(m_PlayerPaddle));
-			}
+			m_PlayerPaddle = GameObject.Instantiate<PlayerGO>(this, new Transform(new Vector2(1, 1), new Vector2(5, 20), 0));
+			m_PlayerPaddle.AddComponent(new PlayerEntity(m_PlayerPaddle));
+			m_PlayerPaddle.AddComponent(new PlayerController(m_PlayerPaddle));
+			m_players.Add(NetworkManager.m_Instance.playerID, m_PlayerPaddle.GetComponent<PlayerEntity>());
 
             NetworkManager.m_Instance.TCPSendMessage(new NETPlayerPlay(NetworkManager.m_Instance.playerID));
 
@@ -113,20 +109,17 @@ namespace Multiplayer_Games_Programming_Framework
 					break;
 
 				case GameModeState.STARTING:
-					m_BallController.Init(10, new Vector2((float)m_Random.NextDouble(), (float)m_Random.NextDouble()));
-					m_BallController.StartBall();
-					
 					m_GameModeState = GameModeState.PLAYING;
 
 					break;
 
 				case GameModeState.PLAYING:
 
-					if(m_GameTimer > 60)
-					{
-						m_Ball.Destroy();
-						m_GameModeState = GameModeState.ENDING;
-					}
+					//if(m_GameTimer > 60)
+					//{
+					//	m_Ball.Destroy();
+					//	m_GameModeState = GameModeState.ENDING;
+					//}
 
 					break;
 
