@@ -121,7 +121,7 @@ namespace Multiplayer_Games_Programming_Server
                     break;
                 case PacketType.PLAYERPLAY:
                     NETPlayerPlay start = (NETPlayerPlay)packet;
-                    if(m_Clients[start.playerID].StartGame(m_playingClients) == true)
+                    if(m_Clients[start.playerID].StartGame() == true)
                     {
                         m_playingClients.Add(m_Clients[start.playerID]);
                         SceneSync(m_Clients[start.playerID]);
@@ -140,7 +140,7 @@ namespace Multiplayer_Games_Programming_Server
 
             foreach(ConnectedClient client in m_Clients.Values)
             {
-                if(client.id == originID)
+                if(client.GetID() == originID)
                 {
                     continue;
                 }
@@ -185,8 +185,11 @@ namespace Multiplayer_Games_Programming_Server
             lock (m_Clients) {
                 foreach(ConnectedClient connectedClient in m_Clients.Values)
                 {
-                    NETPlayerUpdate updatePlayer = new NETPlayerUpdate(connectedClient.GetData());
-                    client.Send(updatePlayer);
+                    if (connectedClient.IsPlaying())
+                    {
+                        NETPlayerUpdate updatePlayer = new NETPlayerUpdate(connectedClient.GetData());
+                        client.Send(updatePlayer);
+                    }
                 }
             }
         }

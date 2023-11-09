@@ -16,11 +16,11 @@ namespace Multiplayer_Games_Programming_Server
         StreamReader m_netReader;
         StreamWriter m_netWriter;
 
-
-        public bool playingGame = false;
-
         PlayerData m_playerData;
 
+
+        public bool IsPlaying() { return m_playerData.isPlaying; }
+        public void SetPlaying(bool playing) {  m_playerData.isPlaying = playing; }
         public void SetID(int id) { m_playerData.playerID = id; }
         public int GetID() {  return m_playerData.playerID; }
         public PlayerData GetData() { return m_playerData; }
@@ -86,15 +86,18 @@ namespace Multiplayer_Games_Programming_Server
             return packet.ToJson();
         }
 
-        public bool StartGame(List<ConnectedClient> clients)
+        public bool StartGame()
         {
-            NETPlayerUpdate createCharacter = new NETPlayerUpdate();
-            createCharacter.data = GetData();
+            lock (this)
+            {
+                NETPlayerUpdate createCharacter = new NETPlayerUpdate();
+                createCharacter.data = GetData();
 
-            Send(createCharacter);
-            
-            playingGame = true;
-            return true;
+                Send(createCharacter);
+
+                SetPlaying(true);
+                return true;
+            }
         }
     }
 }

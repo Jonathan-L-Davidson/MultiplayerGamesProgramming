@@ -118,12 +118,12 @@ internal class NetworkManager
 				HandleLogin(loginPacket);
 				break;
             case (PacketType.PLAYERPLAY):
-                NETPlayerList playPacket = (NETPlayerList)playPacket;
+                NETPlayerPlay playPacket = (NETPlayerPlay)packet;
                 HandlePlayerJoin(playPacket);
                 break;
-            case (PacketType.PLAYERLIST):
-				NETPlayerList listPacket = (NETPlayerList)packet;
-				InitPlayerList(listPacket);
+            case (PacketType.PLAYERUPDATE):
+                NETPlayerUpdate updatePlayerPacket = (NETPlayerUpdate)packet;
+				UpdatePlayer(updatePlayerPacket);
 				break;
 			case (PacketType.PLAYERMOVE):
 				NETPlayerMove movePacket = (NETPlayerMove)packet;
@@ -155,18 +155,13 @@ internal class NetworkManager
 	}
 
 
-	private void InitPlayerList(NETPlayerList playerList)
+	private void UpdatePlayer(NETPlayerUpdate playerUpdate)
 	{
-		if (playerList.playerID != playerID)
-		{
-			return; // Error! This isn't for us.
-		}
+		// Check if ID is in the player entity list.
+		// if not, create a new player.
+		
+		// Set data from playerUpdate to player, using a lock to prevent any conflict in data.
 
-		foreach (PlayerData player in playerList.players)
-		{
-			Transform pos = new Transform(new Vector2(player.x, player.y));
-			CreateNetworkPlayer(player.playerID, pos, player);
-		}
 	}
 
 	private void CreateNetworkPlayer(int id, Transform pos, PlayerData playerInfo)

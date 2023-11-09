@@ -14,6 +14,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public float y;
         public string spriteID;
         public float health;
+        public bool isPlaying;
     }
 
     public struct ObjData
@@ -89,10 +90,6 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<NETMessage>(root.GetRawText(), options);
                     }
-                    if (typeProperty.GetByte() == (byte)PacketType.POSITION)
-                    {
-                        return JsonSerializer.Deserialize<NETPosition>(root.GetRawText(), options);
-                    }
                     if (typeProperty.GetByte() == (byte)PacketType.PLAYERMOVE)
                     {
                         return JsonSerializer.Deserialize<NETPlayerMove>(root.GetRawText(), options);
@@ -101,15 +98,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<NETPlayerLogin>(root.GetRawText(), options);
                     }
-                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERLIST)
-                    {
-                        return JsonSerializer.Deserialize<NETPlayerList>(root.GetRawText(), options);
-                    }
                     if (typeProperty.GetByte() == (byte)PacketType.PLAYERCREATE)
-                    {
-                        return JsonSerializer.Deserialize<NETPlayerCreate>(root.GetRawText(), options);
-                    }
-                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERSTART)
                     {
                         return JsonSerializer.Deserialize<NETPlayerPlay>(root.GetRawText(), options);
                     }
