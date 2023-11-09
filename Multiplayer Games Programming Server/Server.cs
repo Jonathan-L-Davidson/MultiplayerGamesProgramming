@@ -20,7 +20,7 @@ namespace Multiplayer_Games_Programming_Server
         ConcurrentDictionary<int, ConnectedClient> m_Clients;
         List<ConnectedClient> m_playingClients;
 
-        list<GameObject> m_gameObjects;
+        List<GameObject> m_gameObjects;
 
         public Server(string ipAddress, int port)
         {
