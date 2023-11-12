@@ -73,5 +73,17 @@ namespace Multiplayer_Games_Programming_Framework
 
             return -1; // error out.
         }
+
+        public PlayerData GetData()
+        {
+            PlayerData data = new PlayerData();
+            data.playerID = GetID();
+            data.health = this.health;
+            data.x = m_Rigidbody.m_Transform.Position.X;
+            data.y = m_Rigidbody.m_Transform.Position.Y;
+            data.spriteID = "";
+            data.isPlaying = true;
+            return data;
+        }
     }
 }

@@ -47,7 +47,7 @@ namespace Multiplayer_Games_Programming_Framework
 			m_PlayerPaddle.AddComponent(new PlayerController(m_PlayerPaddle));
 			m_players.Add(NetworkManager.m_Instance.playerID, m_PlayerPaddle.GetComponent<PlayerEntity>());
 
-            NetworkManager.m_Instance.TCPSendMessage(new NETPlayerPlay(NetworkManager.m_Instance.playerID));
+            NetworkManager.m_Instance.TCPSendMessage(new NETPlayerPlay(NetworkManager.m_Instance.playerID, m_PlayerPaddle.GetComponent<PlayerEntity>().GetData()));
 
             //else
             //{

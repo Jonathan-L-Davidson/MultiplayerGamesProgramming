@@ -108,7 +108,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     }
                     if (typeProperty.GetByte() == (byte)PacketType.PLAYERCREATE)
                     {
-                        return JsonSerializer.Deserialize<NETPlayerPlay>(root.GetRawText(), options);
+                        return JsonSerializer.Deserialize<NETPlayerCreate>(root.GetRawText(), options);
                     }
                 }
             }
@@ -198,6 +198,26 @@ namespace Multiplayer_Games_Programming_Packet_Library
     }
     #endregion
 
+    #region "Player Create Packet"
+    public class NETPlayerCreate : Packet
+    {
+        [JsonPropertyName("Data")]
+        public PlayerData data;
+
+        public NETPlayerCreate()
+        {
+            m_type = PacketType.PLAYERCREATE;
+        }
+
+        public NETPlayerCreate(PlayerData data)
+        {
+            m_type = PacketType.PLAYERCREATE;
+            this.data = data;
+        }
+
+    }
+    #endregion
+
     #region "Player Update Packet"
     public class NETPlayerUpdate : Packet
     {
@@ -224,7 +244,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         [JsonPropertyName("PlayerID")]
         public int playerID;
         [JsonPropertyName("Data")]
-        PlayerData data;
+        public PlayerData data;
 
         public NETPlayerPlay()
         {

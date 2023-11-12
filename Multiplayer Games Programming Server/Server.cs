@@ -140,7 +140,13 @@ namespace Multiplayer_Games_Programming_Server
             }
         }
 
-        private void RelayPacket(Packet packet, int originID = -1)
+        /// <summary>
+        /// Relays the packet to all connected clients.
+        /// </summary>
+        /// <param name="packet">Packet to send.</param>
+        /// <param name="originID">Pass the client ID if you do not want to send to that client.</param>
+        /// <param name="activePlayers">Boolean to only send to players who are playing.</param>
+        private void RelayPacket(Packet packet, int originID = -1, bool activePlayers = false)
         {
             if (packet == null) { return;}
 
@@ -149,6 +155,14 @@ namespace Multiplayer_Games_Programming_Server
                 if(client.GetID() == originID)
                 {
                     continue;
+                }
+
+                if (activePlayers)
+                {
+                    if (!client.IsPlaying()) // If the player is not playing.
+                    {
+                        continue;
+                    }
                 }
 
                 client.Send(packet);

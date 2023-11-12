@@ -119,6 +119,10 @@ internal class NetworkManager
                 NETPlayerPlay playPacket = (NETPlayerPlay)packet;
                 //HandlePlayerJoin(playPacket);
                 break;
+			case (PacketType.PLAYERCREATE):
+				NETPlayerCreate createPacket = (NETPlayerCreate)packet;
+				CreateNetworkPlayer(createPacket.data);
+				break;
             case (PacketType.PLAYERUPDATE):
                 NETPlayerUpdate updatePlayerPacket = (NETPlayerUpdate)packet;
 				UpdatePlayer(updatePlayerPacket);
