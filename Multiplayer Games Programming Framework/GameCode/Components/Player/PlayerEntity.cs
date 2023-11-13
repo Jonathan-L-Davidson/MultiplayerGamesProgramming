@@ -14,8 +14,7 @@ namespace Multiplayer_Games_Programming_Framework
     internal class PlayerEntity : Component
     {
         public int playerID;
-
-        PlayerEntity player;
+        public string spriteState = "Ball";
 
         public Vector2 playerInput;
 
@@ -35,19 +34,24 @@ namespace Multiplayer_Games_Programming_Framework
         protected override void Start(float deltaTime)
         {
             // Start player info here.
+            GetRigidbody();
+        }
+
+        public void GetRigidbody()
+        {
             m_Rigidbody = m_GameObject.GetComponent<Rigidbody>();
         }
 
         protected override void Update(float deltaTime)
         {
-            Vector2 Movement = m_Transform.Right * m_movementLoop.X + m_Transform.Up * m_movementLoop.Y;
+            Vector2 Movement = m_Transform.Right * this.m_movementLoop.X + m_Transform.Up * this.m_movementLoop.Y;
             m_Rigidbody.m_Body.ApplyLinearImpulse(Movement * m_Speed * deltaTime);
             UpdateMovement();
         }
 
         public void SetMovementLoop(Vector2 loop)
         {
-            m_movementLoop = loop;
+            this.m_movementLoop = loop;
         }
 
         public void NetUpdate()
@@ -69,25 +73,26 @@ namespace Multiplayer_Games_Programming_Framework
 
         public PlayerData GetData()
         {
+
             PlayerData data = new PlayerData();
             data.playerID = GetID();
             data.health = this.health;
             data.x = m_Rigidbody.m_Transform.Position.X;
             data.y = m_Rigidbody.m_Transform.Position.Y;
-            data.spriteID = "";
+            data.spriteID = spriteState;
             data.isPlaying = true;
             return data;
         }
         private void UpdateMovement()
         {
-            player.SetMovementLoop(playerInput);
+            SetMovementLoop(playerInput);
         }
 
         public void TakeDamage(int damage, int attacker)
         {
             lock (this)
             {
-                player.health -= damage;
+                health -= damage;
                 //NetworkManager.m_Instance.TCPSendMessage(new NETHitRegister(damage, attacker));
             }
         }

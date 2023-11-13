@@ -42,8 +42,7 @@ namespace Multiplayer_Games_Programming_Framework
 			float screenWidth = Constants.m_ScreenWidth;
 			float screenHeight = Constants.m_ScreenHeight;
 
-			m_PlayerPaddle = GameObject.Instantiate<PlayerGO>(this, new Transform(new Vector2(1, 1), new Vector2(5, 20), 0));
-			m_PlayerPaddle.AddComponent(new PlayerEntity(m_PlayerPaddle));
+			m_PlayerPaddle = GameObject.Instantiate<PlayerGO>(this, new Transform(new Vector2(100, 500), new Vector2(1, 1), 0));
 			m_PlayerPaddle.AddComponent(new PlayerController(m_PlayerPaddle));
 			m_players.Add(NetworkManager.m_Instance.playerID, m_PlayerPaddle.GetComponent<PlayerEntity>());
 

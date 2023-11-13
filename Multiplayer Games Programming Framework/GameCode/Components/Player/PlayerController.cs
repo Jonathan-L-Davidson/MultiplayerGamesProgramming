@@ -38,21 +38,22 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
             if (Keyboard.GetState().IsKeyDown(Keys.S)) { input.Y = 1; }     // Down
             if (Keyboard.GetState().IsKeyDown(Keys.D)) { input.X = 1; }     // Right
 
-            if (input != player.m_movementLoop)
+            if (input != player.playerInput)
             {
                 UpdateMovement(input);
             }
         }
         private void UpdateMovement(Vector2 input)
         {
+            player.playerInput = input;
             player.SetMovementLoop(input);
             UpdateNetworkMovement();
         }
         private void UpdateNetworkMovement()
         {
             System.Numerics.Vector2 loop;
-            loop.X = player.m_movementLoop.X;
-            loop.Y = player.m_movementLoop.Y;
+            loop.X = player.playerInput.X;
+            loop.Y = player.playerInput.Y;
 
             NETPlayerMove movePacket = new NETPlayerMove(loop, NetworkManager.m_Instance.playerID);
             NetworkManager.m_Instance.TCPSendMessage(movePacket);
