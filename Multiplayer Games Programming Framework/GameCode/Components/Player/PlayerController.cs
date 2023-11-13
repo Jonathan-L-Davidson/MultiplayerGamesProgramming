@@ -12,8 +12,6 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
 {
     internal class PlayerController : Component
     {
-        int playerID;
-
         PlayerEntity player;
         public PlayerController(GameObject gameObject) : base(gameObject)
         {
@@ -23,7 +21,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
         protected override void Start(float deltaTime)
         {
             player = m_GameObject.GetComponent<PlayerEntity>();
-            playerID = NetworkManager.m_Instance.playerID;
+            player.playerID = NetworkManager.m_Instance.playerID;
         }
 
         protected override void Update(float deltaTime)

@@ -13,6 +13,12 @@ namespace Multiplayer_Games_Programming_Framework
 {
     internal class PlayerEntity : Component
     {
+        public int playerID;
+
+        PlayerEntity player;
+
+        public Vector2 playerInput;
+
         public float m_Speed { get; private set; }
         public float m_maxSpeed { get; private set; }
         public  Rigidbody m_Rigidbody { get; private set; }
@@ -36,6 +42,7 @@ namespace Multiplayer_Games_Programming_Framework
         {
             Vector2 Movement = m_Transform.Right * m_movementLoop.X + m_Transform.Up * m_movementLoop.Y;
             m_Rigidbody.m_Body.ApplyLinearImpulse(Movement * m_Speed * deltaTime);
+            UpdateMovement();
         }
 
         public void SetMovementLoop(Vector2 loop)
@@ -48,15 +55,7 @@ namespace Multiplayer_Games_Programming_Framework
             lock (this)
             {
                 string spriteID = this.m_GameObject.GetComponent<SpriteRenderer>().m_Texture.ToString();
-                PlayerData data = new PlayerData
-                {
-                    playerID = GetID(),
-                    x = this.m_Transform.Position.X,
-                    y = this.m_Transform.Position.Y,
-                    spriteID = spriteID,
-                    health = this.health,
-                    isPlaying = true
-                };
+                PlayerData data = GetData();
 
                 NETPlayerUpdate playerUpdate = new NETPlayerUpdate(data);
                 NetworkManager.m_Instance.TCPSendMessage(playerUpdate);
@@ -65,13 +64,7 @@ namespace Multiplayer_Games_Programming_Framework
 
         public int GetID()
         {
-            PlayerController controller = this.m_GameObject.GetComponent<PlayerController>();
-            PlayerNetwork networkController = this.m_GameObject.GetComponent<PlayerNetwork>();
-
-            if(controller != null) { return NetworkManager.m_Instance.playerID; }
-            if(networkController != null) { return networkController.playerID; }
-
-            return -1; // error out.
+            return playerID;
         }
 
         public PlayerData GetData()
@@ -85,5 +78,19 @@ namespace Multiplayer_Games_Programming_Framework
             data.isPlaying = true;
             return data;
         }
+        private void UpdateMovement()
+        {
+            player.SetMovementLoop(playerInput);
+        }
+
+        public void TakeDamage(int damage, int attacker)
+        {
+            lock (this)
+            {
+                player.health -= damage;
+                //NetworkManager.m_Instance.TCPSendMessage(new NETHitRegister(damage, attacker));
+            }
+        }
+
     }
 }

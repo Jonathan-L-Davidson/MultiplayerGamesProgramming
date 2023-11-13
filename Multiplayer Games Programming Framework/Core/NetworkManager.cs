@@ -150,8 +150,7 @@ internal class NetworkManager
 	private void HandePlayerMovement(NETPlayerMove movePacket)
 	{
 		GameScene gameScene = (GameScene)activeScene;
-		Dictionary<int, PlayerEntity> players = gameScene.GetPlayers();
-        PlayerNetwork playerRef = players[movePacket.playerID].m_GameObject.GetComponent<PlayerNetwork>();
+		PlayerEntity playerRef = gameScene.GetPlayers()[movePacket.playerID];
 		if (playerRef != null)
 		{
 			playerRef.playerInput = new Vector2(movePacket.x, movePacket.y);
@@ -191,7 +190,6 @@ internal class NetworkManager
 
 		PlayerEntity entity = new PlayerEntity(newPlayer);
 		newPlayer.AddComponent(entity);
-		newPlayer.AddComponent(new PlayerNetwork(newPlayer, data));
 
 		GameScene gameScene = (GameScene)activeScene;
 		if(gameScene == null) { return null; }
