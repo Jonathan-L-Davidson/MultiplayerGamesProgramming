@@ -51,11 +51,14 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
         }
         private void UpdateNetworkMovement()
         {
-            System.Numerics.Vector2 loop;
+            System.Numerics.Vector2 loop, position;
             loop.X = player.playerInput.X;
             loop.Y = player.playerInput.Y;
 
-            NETPlayerMove movePacket = new NETPlayerMove(loop, NetworkManager.m_Instance.playerID);
+            position.X = player.m_GameObject.m_Transform.Position.X;
+            position.Y = player.m_GameObject.m_Transform.Position.Y;
+
+            NETPlayerMove movePacket = new NETPlayerMove(loop, position, NetworkManager.m_Instance.playerID);
             NetworkManager.m_Instance.TCPSendMessage(movePacket);
         }
 

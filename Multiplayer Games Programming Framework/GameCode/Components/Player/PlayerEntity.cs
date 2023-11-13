@@ -29,6 +29,7 @@ namespace Multiplayer_Games_Programming_Framework
         {
             m_Speed = 75;
             health = 100.0f;
+            playerID = NetworkManager.m_Instance.playerID;
         }
 
         protected override void Start(float deltaTime)

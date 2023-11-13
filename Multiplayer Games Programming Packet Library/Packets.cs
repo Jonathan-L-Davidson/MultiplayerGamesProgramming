@@ -151,7 +151,12 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public float x;
         [JsonPropertyName("Y")]
         public float y;
-        
+
+        [JsonPropertyName("PosX")]
+        public float posX;
+        [JsonPropertyName("PosY")]
+        public float posY;
+
         [JsonPropertyName("PlayerID")]
         public int playerID;
 
@@ -160,12 +165,17 @@ namespace Multiplayer_Games_Programming_Packet_Library
             m_type = PacketType.PLAYERMOVE;
         }
 
-        public NETPlayerMove(Vector2 position, int playerID)
+        public NETPlayerMove(Vector2 input, Vector2 position, int playerID)
         {
             m_type = PacketType.PLAYERMOVE;
-            this.x = position.X;
-            this.y = position.Y;
+            this.x = input.X;
+            this.y = input.Y;
+            
+            this.posX = position.X;
+            this.posY = position.Y;
+
             this.playerID = playerID;
+
         }
 
         public NETPlayerMove(float x, float y, int playerID)

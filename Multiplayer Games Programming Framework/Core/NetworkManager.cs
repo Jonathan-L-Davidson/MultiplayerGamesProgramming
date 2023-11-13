@@ -154,6 +154,7 @@ internal class NetworkManager
 		if (playerRef != null)
 		{
 			playerRef.playerInput = new Vector2(movePacket.x, movePacket.y);
+			playerRef.m_GameObject.m_Transform.Position = new Vector2(movePacket.posX, movePacket.posY);
 		}
 	}
 
