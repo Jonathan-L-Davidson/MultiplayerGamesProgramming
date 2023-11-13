@@ -25,11 +25,11 @@ namespace Multiplayer_Games_Programming_Framework
 
         public float health;
 
-        public PlayerEntity(GameObject gameObject) : base(gameObject)
+        public PlayerEntity(GameObject gameObject, int playerID) : base(gameObject)
         {
             m_Speed = 75;
             health = 100.0f;
-            playerID = NetworkManager.m_Instance.playerID;
+            this.playerID = playerID;
         }
 
         protected override void Start(float deltaTime)
@@ -74,12 +74,11 @@ namespace Multiplayer_Games_Programming_Framework
 
         public PlayerData GetData()
         {
-
             PlayerData data = new PlayerData();
             data.playerID = GetID();
             data.health = this.health;
-            data.x = m_Rigidbody.m_Transform.Position.X;
-            data.y = m_Rigidbody.m_Transform.Position.Y;
+            data.x = m_Transform.Position.X;
+            data.y = m_Transform.Position.Y;
             data.spriteID = spriteState;
             data.isPlaying = true;
             return data;

@@ -73,9 +73,9 @@ internal class NetworkManager
 
 	private void TcpProcessServerResponse()
 	{
-		try
+		while (m_tcpClient.Connected)
 		{
-			while (m_tcpClient.Connected)
+			try
 			{
 				string msg = m_netReader.ReadLine();
 
@@ -83,12 +83,11 @@ internal class NetworkManager
 				Packet packet = DeserialisePacket(msg);
 
 				HandlePacket(packet);
-
 			}
-		}
-		catch (Exception e)
-		{
-			Debug.WriteLine($"TCP Process Error: {e.Message}");
+			catch (Exception e)
+			{
+				Debug.WriteLine($"TCP Process Error: {e.Message}");
+			}
 		}
 	}
 
@@ -149,12 +148,15 @@ internal class NetworkManager
 
 	private void HandePlayerMovement(NETPlayerMove movePacket)
 	{
-		GameScene gameScene = (GameScene)activeScene;
-		PlayerEntity playerRef = gameScene.GetPlayers()[movePacket.playerID];
-		if (playerRef != null)
+		lock(activeScene)
 		{
-			playerRef.playerInput = new Vector2(movePacket.x, movePacket.y);
-			playerRef.m_GameObject.m_Transform.Position = new Vector2(movePacket.posX, movePacket.posY);
+			GameScene gameScene = (GameScene)activeScene;
+			PlayerEntity playerRef = gameScene.GetPlayers()[movePacket.playerID];
+			if (playerRef != null)
+			{
+				playerRef.playerInput = new Vector2(movePacket.x, movePacket.y);
+				playerRef.m_Rigidbody.UpdatePosition(new Vector2(movePacket.posX, movePacket.posY));
+			}
 		}
 	}
 
@@ -189,8 +191,9 @@ internal class NetworkManager
 		
 		PlayerGO newPlayer = GameObject.Instantiate<PlayerGO>(activeScene, trans);
 
-		PlayerEntity entity = new PlayerEntity(newPlayer);
-		newPlayer.AddComponent(entity);
+		PlayerEntity entity = new PlayerEntity(newPlayer, data.playerID);
+
+        newPlayer.AddComponent(entity);
 
 		GameScene gameScene = (GameScene)activeScene;
 		if(gameScene == null) { return null; }

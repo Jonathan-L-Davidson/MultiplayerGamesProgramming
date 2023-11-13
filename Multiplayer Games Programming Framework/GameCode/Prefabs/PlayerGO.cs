@@ -8,7 +8,7 @@ internal class PlayerGO : GameObject
 {
     public PlayerGO(Scene scene, Transform transform) : base(scene, transform)
     {
-        PlayerEntity entity = AddComponent(new PlayerEntity(this));
+        PlayerEntity entity = AddComponent(new PlayerEntity(this, NetworkManager.m_Instance.playerID));
 
         SpriteRenderer sr = AddComponent(new SpriteRenderer(this, entity.spriteState));
         sr.m_DepthLayer = 0;

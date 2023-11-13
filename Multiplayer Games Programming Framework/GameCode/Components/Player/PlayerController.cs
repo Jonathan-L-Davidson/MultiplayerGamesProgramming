@@ -15,7 +15,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
         PlayerEntity player;
         public PlayerController(GameObject gameObject) : base(gameObject)
         {
-            
+
         }
 
         protected override void Start(float deltaTime)
@@ -58,7 +58,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
             position.X = player.m_GameObject.m_Transform.Position.X;
             position.Y = player.m_GameObject.m_Transform.Position.Y;
 
-            NETPlayerMove movePacket = new NETPlayerMove(loop, position, NetworkManager.m_Instance.playerID);
+            NETPlayerMove movePacket = new NETPlayerMove(loop, position, player.playerID);
             NetworkManager.m_Instance.TCPSendMessage(movePacket);
         }
 
