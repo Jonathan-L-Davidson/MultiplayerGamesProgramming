@@ -63,7 +63,7 @@ namespace Multiplayer_Games_Programming_Framework
                 PlayerData data = GetData();
 
                 NETPlayerUpdate playerUpdate = new NETPlayerUpdate(data);
-                NetworkManager.m_Instance.TCPSendMessage(playerUpdate);
+                NetworkManager.m_Instance.UDPSendMessage(playerUpdate);
             }
         }
 

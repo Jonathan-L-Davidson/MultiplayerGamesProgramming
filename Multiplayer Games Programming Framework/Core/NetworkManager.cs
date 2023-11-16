@@ -11,6 +11,8 @@ using System.Linq.Expressions;
 using Myra;
 using System.Linq;
 using Multiplayer_Games_Programming_Framework.GameCode.Components.Player;
+using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace Multiplayer_Games_Programming_Framework;
 
@@ -21,7 +23,37 @@ internal class NetworkManager
 	public Scene activeScene;
 	public int playerID = -1;
 
-	public static NetworkManager m_Instance
+    RSACryptoServiceProvider m_RsaProvider;
+    RSAParameters m_serverPublicKey;
+    RSAParameters m_clientPrivateKey; //this is this owners private key
+    public RSAParameters m_clientPublicKey; //this is the public key of the other owner
+
+    NETEncryptedPacket EncryptPacket(Packet packet)
+	{
+		// use m_serverPublicKey
+		lock (m_RsaProvider)
+		{
+			m_RsaProvider.ImportParameters(m_serverPublicKey); //sets the providers current key to be the other owner
+			string json = packet.ToJson(); //serialise the animal
+			byte[] encryptedData = m_RsaProvider.Encrypt(Encoding.UTF8.GetBytes(json), false); //encrypt the data into a byte array
+			NETEncryptedPacket encryptedPacket = new NETEncryptedPacket(encryptedData, playerID);
+			return encryptedPacket;
+		}
+    }
+
+    Packet DecryptPacket(NETEncryptedPacket packet)
+	{
+		// use m_clientPrivateKey
+		lock (m_RsaProvider)
+		{
+            m_RsaProvider.ImportParameters(m_clientPrivateKey); //sets the providers current key to be this owners private key
+            byte[] decrypted = m_RsaProvider.Decrypt(packet.data, false); //decrypt the byte array
+            string json = Encoding.UTF8.GetString(decrypted); //get the json string
+            return Packet.Deserialise(json); ; //Deserialise the json into a packet
+        }
+    }
+
+    public static NetworkManager m_Instance
 	{
 		get
 		{
@@ -35,25 +67,34 @@ internal class NetworkManager
 	}
 
 	TcpClient m_tcpClient;
-	NetworkStream m_netStream;
+    UdpClient m_udpClient;
+
+    NetworkStream m_netStream;
 	StreamReader m_netReader;
 	StreamWriter m_netWriter;
 
 	NetworkManager()
 	{
-		m_tcpClient = new TcpClient();
-	}
+		m_tcpClient = new();
+        m_udpClient = new();
+    }
 
-	public bool Connect(string ip, int port)
+    public bool Connect(string ip, int port)
 	{
 		try
 		{
 			m_tcpClient.Connect(ip, port);
 			m_netStream = m_tcpClient.GetStream();
-			m_netReader = new StreamReader(m_netStream, Encoding.UTF8);
+            m_udpClient.Connect(ip, port);
+
+            m_netReader = new StreamReader(m_netStream, Encoding.UTF8);
 			m_netWriter = new StreamWriter(m_netStream, Encoding.UTF8);
 
-			Run();
+            m_RsaProvider = new RSACryptoServiceProvider(1024); //init the service and set the size of the keys (note the higher the value the stronger the encryption but it is slower)
+            m_clientPublicKey = m_RsaProvider.ExportParameters(false); //false provides the public key
+            m_clientPrivateKey = m_RsaProvider.ExportParameters(true); //true provides the private key
+
+            Run();
 			return true;
 		}
 		catch (Exception e)
@@ -69,17 +110,19 @@ internal class NetworkManager
 		Thread TcpThread = new Thread(new ThreadStart(TcpProcessServerResponse));
 		TcpThread.Name = "TCP NetHandler";
 		TcpThread.Start();
-	}
+		UdpProcessServerResponse();
+    }
 
 	private void TcpProcessServerResponse()
 	{
+
 		while (m_tcpClient.Connected)
 		{
 			try
 			{
 				string msg = m_netReader.ReadLine();
 
-				Debug.WriteLine($"Message recieved: {msg}");
+				Debug.WriteLine($"TCP Message recieved: {msg}");
 				Packet packet = DeserialisePacket(msg);
 
 				HandlePacket(packet);
@@ -90,12 +133,47 @@ internal class NetworkManager
 			}
 		}
 	}
+    async Task UdpProcessServerResponse()
+    {
+        while (m_tcpClient.Connected)
+        {
+			try
+			{
+				UdpReceiveResult receiveResult = await m_udpClient.ReceiveAsync();
+				byte[] receivedData = receiveResult.Buffer;
 
-	public void TCPSendMessage(Packet packet)
+				string msg = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
+				Debug.WriteLine($"UDP Message recieved: {msg}");
+				Packet packet = DeserialisePacket(msg);
+
+				HandlePacket(packet);
+			}
+			catch (SocketException e)
+			{
+				Console.WriteLine("Client UDP Read Method exception: " + e.Message);
+			}
+		}
+    }
+
+    public void TCPSendMessage(Packet packet, bool encryption = true)
 	{
+		if (encryption)
+		{
+			packet = EncryptPacket(packet);
+		}
 		m_netWriter.WriteLine(packet.ToJson());
 		m_netWriter.Flush();
 
+	}
+
+	public void UDPSendMessage(Packet packet, bool encryption = true)
+	{
+        if (encryption)
+        {
+            packet = EncryptPacket(packet);
+        }
+        byte[] bytes = Encoding.UTF8.GetBytes(packet.ToJson());
+        m_udpClient.Send(bytes, bytes.Length);
 	}
 
 	private Packet DeserialisePacket(string msg)
@@ -107,6 +185,11 @@ internal class NetworkManager
 	{
 		switch (packet.m_type)
 		{
+			case PacketType.ENCRYPTED:
+				NETEncryptedPacket encryptedPacket = (NETEncryptedPacket)packet;
+				Packet decryptedPacket = DecryptPacket(encryptedPacket);
+				HandlePacket(decryptedPacket);
+				break;
 			case (PacketType.OBJUPDATE):
 
 				break;
@@ -136,17 +219,17 @@ internal class NetworkManager
 	public void Login()
 	{
 		NETMessage message = new NETMessage($"Hello server!!");
-		TCPSendMessage(message);
-
-
+		TCPSendMessage(message, false);
 	}
 
 	private void HandleLogin(NETPlayerLogin loginPacket)
 	{
 		this.playerID = loginPacket.playerID;
-	}
+		this.m_serverPublicKey = loginPacket.publicKey;
+        TCPSendMessage(new NETPlayerLogin(playerID, m_clientPublicKey), encryption: false);
+    }
 
-	private void HandePlayerMovement(NETPlayerMove movePacket)
+    private void HandePlayerMovement(NETPlayerMove movePacket)
 	{
 		lock(activeScene)
 		{

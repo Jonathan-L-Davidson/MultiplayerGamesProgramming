@@ -37,6 +37,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         PLAYERCREATE,
         OBJUPDATE,
         PLAYERLOGOUT,
+        ENCRYPTED,
     }
 
     #region "Packet"
@@ -87,6 +88,10 @@ namespace Multiplayer_Games_Programming_Packet_Library
                 var root = doc.RootElement;
                 if (root.TryGetProperty("Type", out var typeProperty))
                 {
+                    if (typeProperty.GetByte() == (byte)PacketType.ENCRYPTED)
+                    {
+                        return JsonSerializer.Deserialize<NETEncryptedPacket>(root.GetRawText(), options);
+                    }
                     if (typeProperty.GetByte() == (byte)PacketType.MSG)
                     {
                         return JsonSerializer.Deserialize<NETMessage>(root.GetRawText(), options);
@@ -123,6 +128,29 @@ namespace Multiplayer_Games_Programming_Packet_Library
         }
     }
     #endregion
+
+
+    #region "Encrypted Packet"
+    public class NETEncryptedPacket : Packet
+    {
+        [JsonPropertyName("ByteArray")]
+        public byte[] data;
+        [JsonPropertyName("PlayerID")]
+        public int playerID;
+
+        public NETEncryptedPacket()
+        {
+            m_type = PacketType.ENCRYPTED;
+        }
+
+        public NETEncryptedPacket(byte[] data, int playerID)
+        {
+            m_type = PacketType.ENCRYPTED;
+            this.playerID = playerID;
+            this.data = data;
+        }
+    }
+    #endregion "Encrypted Packet"
 
     #region "Message Packet"
     public class NETMessage : Packet
@@ -195,15 +223,19 @@ namespace Multiplayer_Games_Programming_Packet_Library
         [JsonPropertyName("PlayerID")]
         public int playerID;
 
+        [JsonPropertyName("Public Key")]
+        public RSAParameters publicKey;
+
         public NETPlayerLogin()
         {
             m_type = PacketType.PLAYERLOGIN;
         }
 
-        public NETPlayerLogin(int playerID)
+        public NETPlayerLogin(int playerID, RSAParameters publicKey)
         {
             m_type = PacketType.PLAYERLOGIN;
             this.playerID = playerID;
+            this.publicKey = publicKey;
         }
 
     }

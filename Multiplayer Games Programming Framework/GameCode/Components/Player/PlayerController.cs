@@ -59,7 +59,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
             position.Y = player.m_GameObject.m_Transform.Position.Y;
 
             NETPlayerMove movePacket = new NETPlayerMove(loop, position, player.playerID);
-            NetworkManager.m_Instance.TCPSendMessage(movePacket);
+            NetworkManager.m_Instance.UDPSendMessage(movePacket);
         }
 
     }

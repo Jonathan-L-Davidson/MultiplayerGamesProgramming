@@ -5,6 +5,8 @@ using Multiplayer_Games_Programming_Packet_Library;
 using System.Text;
 using System.Linq;
 using System.Numerics;
+using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace Multiplayer_Games_Programming_Server
 {
@@ -12,6 +14,7 @@ namespace Multiplayer_Games_Programming_Server
     {
         
         TcpListener m_TcpListener;
+        UdpClient m_UdpListener;
         int m_port;
         IPAddress m_ipAddress;
 
@@ -27,6 +30,7 @@ namespace Multiplayer_Games_Programming_Server
             m_port = port;
             
             m_TcpListener = new TcpListener(m_ipAddress, m_port);
+            m_UdpListener = new UdpClient(m_port);
 
             m_Clients = new();
             m_gameObjects = new();
@@ -40,6 +44,8 @@ namespace Multiplayer_Games_Programming_Server
                 Console.WriteLine($"Server started on {m_TcpListener.LocalEndpoint}");
                 bool active = true;
 
+                ListenUDP();
+
                 while (active)
                 {
                     Socket socket = m_TcpListener.AcceptSocket();
@@ -48,15 +54,18 @@ namespace Multiplayer_Games_Programming_Server
                     int newID = 0;
                     ConnectedClient client = new ConnectedClient(socket);
                     
-                    // There isn't a case where client isn't added to this list and continues. Atleast I hope so, we can assume lines after this will continue.
-                    while (!m_Clients.TryAdd(newID, client))
+                    lock (m_Clients)
                     {
-                        if(newID > m_maxClients)
+                        // There isn't a case where client isn't added to this list and continues. Atleast I hope so, we can assume lines after this will continue.
+                        while (!m_Clients.TryAdd(newID, client))
                         {
-                            client.Close();
-                            return;
+                            if (newID > m_maxClients)
+                            {
+                                client.Close();
+                                return;
+                            }
+                            newID++;
                         }
-                        newID++;
                     }
 
                     Thread clientThread = new Thread(new ParameterizedThreadStart(ClientMethod));
@@ -77,17 +86,16 @@ namespace Multiplayer_Games_Programming_Server
 
         private void ClientMethod(object index)
         {
-
             ConnectedClient? client = m_Clients.ElementAt((int)index).Value;
             client.SetID((int)index);
-            if(client == null) { return; }
+            if (client == null) { return; }
 
-            client.Send(new NETPlayerLogin(client.GetID()));
+            client.Send(new NETPlayerLogin(client.GetID(), client.m_serverPublicKey), encryption:false);
 
             while (client.active)
             {
-                string recieved = client.Read();
-                if(recieved != null && recieved.Length > 0)
+                string recieved = client.ReadTCP();
+                if (recieved != null && recieved.Length > 0)
                 {
                     Console.WriteLine($"Recieved Packet: {recieved}");
                     Packet? packet = Packet.Deserialise(recieved);
@@ -98,18 +106,41 @@ namespace Multiplayer_Games_Programming_Server
                 }
 
             }
-
-            m_Clients.Remove(client.GetID(), out client);
-            client?.Close();
-
+            LogoutClient(client);
         }
 
+        async Task ListenUDP()
+        {
+            while (true)
+            {
+                UdpReceiveResult receiveResult = await m_UdpListener.ReceiveAsync();
+                byte[] receivedData = receiveResult.Buffer;
+
+                string msg = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
+                Debug.WriteLine($"UDP Message recieved: {msg}");
+                Packet? packet = Packet.Deserialise(msg);
+                if (packet != null)
+                {
+                    HandlePacket(packet);
+                }
+            }
+        }
         private void HandlePacket(Packet packet)
         {
             if (packet == null) { return; };
 
             switch(packet.m_type)
             {
+                case PacketType.ENCRYPTED:
+                    NETEncryptedPacket encryptedPacket = (NETEncryptedPacket)packet;
+                    ConnectedClient C = m_Clients[encryptedPacket.playerID];
+                    Packet decryptedPacket = C.DecryptPacket(encryptedPacket);
+                    break;
+                case PacketType.PLAYERLOGIN:
+                    NETPlayerLogin loginPacket = (NETPlayerLogin)packet;
+                    ConnectedClient C2 = m_Clients[loginPacket.playerID];
+                    C2.SetClientKey(loginPacket.publicKey);
+                    break;
                 case PacketType.MSG:
                     NETMessage msg = (NETMessage)packet;
                     msg.PrintMessage();
@@ -133,10 +164,34 @@ namespace Multiplayer_Games_Programming_Server
                     NETPlayerUpdate update = (NETPlayerUpdate)packet;
                     RelayPacket(update);
                     break;
+                case PacketType.PLAYERLOGOUT:
+                    NETPlayerLogout logout = (NETPlayerLogout)packet;
+                    LogoutClient(m_Clients[logout.playerID]);
+                    break;
                 default:
                     Console.WriteLine($"ERROR: PacketType missing, was: {packet.m_type}");
                     break;
 
+            }
+        }
+
+        private void LogoutClient(ConnectedClient client)
+        {
+            if (client != null)
+            {
+                lock (client)
+                {
+                    int id = client.GetID();
+                    client.Logout();
+
+                    NETPlayerLogout logoutPacket = new NETPlayerLogout(id);
+                    RelayPacket(logoutPacket);
+                    lock (m_Clients)
+                    {
+                        m_Clients.Remove(id, out client);
+                    }
+                    client?.Close();
+                }
             }
         }
 
@@ -150,22 +205,25 @@ namespace Multiplayer_Games_Programming_Server
         {
             if (packet == null) { return;}
 
-            foreach(ConnectedClient client in m_Clients.Values)
+            lock (m_Clients)
             {
-                if(client.GetID() == originID)
+                foreach (ConnectedClient client in m_Clients.Values)
                 {
-                    continue;
-                }
-
-                if (activePlayers)
-                {
-                    if (!client.IsPlaying()) // If the player is not playing.
+                    if (client.GetID() == originID)
                     {
                         continue;
                     }
-                }
+
+                    if (activePlayers)
+                    {
+                        if (!client.IsPlaying()) // If the player is not playing.
+                        {
+                            continue;
+                        }
+                    }
 
                 client.Send(packet);
+                }
             }
         }
 
@@ -215,5 +273,7 @@ namespace Multiplayer_Games_Programming_Server
                 }
             }
         }
+
+        
     }
 }
