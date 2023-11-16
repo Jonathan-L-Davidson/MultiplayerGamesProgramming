@@ -36,6 +36,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         PLAYERUPDATE,
         PLAYERCREATE,
         OBJUPDATE,
+        PLAYERLOGOUT,
     }
 
     #region "Packet"
@@ -202,6 +203,26 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public NETPlayerLogin(int playerID)
         {
             m_type = PacketType.PLAYERLOGIN;
+            this.playerID = playerID;
+        }
+
+    }
+    #endregion
+
+    #region "Player Logout Packet"
+    public class NETPlayerLogout : Packet
+    {
+        [JsonPropertyName("PlayerID")]
+        public int playerID;
+
+        public NETPlayerLogout()
+        {
+            m_type = PacketType.PLAYERLOGOUT;
+        }
+
+        public NETPlayerLogout(int playerID)
+        {
+            m_type = PacketType.PLAYERLOGOUT;
             this.playerID = playerID;
         }
 
