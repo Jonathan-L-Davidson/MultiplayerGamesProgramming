@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 
 namespace Multiplayer_Games_Programming_Server
-{
+{    
     internal class Server
     {
         
@@ -117,7 +117,7 @@ namespace Multiplayer_Games_Programming_Server
                 byte[] receivedData = receiveResult.Buffer;
 
                 string msg = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
-                Debug.WriteLine($"UDP Message recieved: {msg}");
+                //Console.WriteLine($"Server UDP Message recieved: {msg}");
                 Packet? packet = Packet.Deserialise(msg);
                 if (packet != null)
                 {
@@ -129,12 +129,15 @@ namespace Multiplayer_Games_Programming_Server
         {
             if (packet == null) { return; };
 
-            switch(packet.m_type)
+
+            switch (packet.m_type)
             {
                 case PacketType.ENCRYPTED:
                     NETEncryptedPacket encryptedPacket = (NETEncryptedPacket)packet;
                     ConnectedClient C = m_Clients[encryptedPacket.playerID];
                     Packet decryptedPacket = C.DecryptPacket(encryptedPacket);
+                    Console.WriteLine($"Server recieved Packet (UNENCRYPTED): {decryptedPacket.ToJson()}");
+                    HandlePacket(decryptedPacket);
                     break;
                 case PacketType.PLAYERLOGIN:
                     NETPlayerLogin loginPacket = (NETPlayerLogin)packet;

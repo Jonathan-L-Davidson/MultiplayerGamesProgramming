@@ -143,7 +143,7 @@ internal class NetworkManager
 				byte[] receivedData = receiveResult.Buffer;
 
 				string msg = Encoding.UTF8.GetString(receivedData, 0, receivedData.Length);
-				Debug.WriteLine($"UDP Message recieved: {msg}");
+				Debug.WriteLine($"CLIENT - UDP Message recieved: {msg}");
 				Packet packet = DeserialisePacket(msg);
 
 				HandlePacket(packet);
