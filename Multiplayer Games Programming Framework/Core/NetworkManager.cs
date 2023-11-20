@@ -13,6 +13,7 @@ using System.Linq;
 using Multiplayer_Games_Programming_Framework.GameCode.Components.Player;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Multiplayer_Games_Programming_Framework;
 
@@ -90,7 +91,7 @@ internal class NetworkManager
             m_netReader = new StreamReader(m_netStream, Encoding.UTF8);
 			m_netWriter = new StreamWriter(m_netStream, Encoding.UTF8);
 
-            m_RsaProvider = new RSACryptoServiceProvider(1024); //init the service and set the size of the keys (note the higher the value the stronger the encryption but it is slower)
+            m_RsaProvider = new RSACryptoServiceProvider(2048); //init the service and set the size of the keys (note the higher the value the stronger the encryption but it is slower)
             m_clientPublicKey = m_RsaProvider.ExportParameters(false); //false provides the public key
             m_clientPrivateKey = m_RsaProvider.ExportParameters(true); //true provides the private key
 
@@ -105,6 +106,10 @@ internal class NetworkManager
 		return false;
 	}
 
+	public void Logout()
+	{
+		TCPSendMessage(new NETPlayerLogout(playerID));
+	}
 	public void Run()
 	{
 		Thread TcpThread = new Thread(new ThreadStart(TcpProcessServerResponse));
@@ -209,11 +214,15 @@ internal class NetworkManager
                 NETPlayerUpdate updatePlayerPacket = (NETPlayerUpdate)packet;
 				UpdatePlayer(updatePlayerPacket);
 				break;
-			case (PacketType.PLAYERMOVE):
-				NETPlayerMove movePacket = (NETPlayerMove)packet;
-				HandePlayerMovement(movePacket);
-				break;
-		}
+            case (PacketType.PLAYERMOVE):
+                NETPlayerMove movePacket = (NETPlayerMove)packet;
+                HandePlayerMovement(movePacket);
+                break;
+            case (PacketType.PLAYERLOGOUT):
+                NETPlayerLogout logoutPacket = (NETPlayerLogout)packet;
+                HandePlayerLogout(logoutPacket);
+                break;
+        }
 	}
 
 	public void Login()
@@ -239,6 +248,7 @@ internal class NetworkManager
 			{
 				playerRef.playerInput = new Vector2(movePacket.x, movePacket.y);
 				playerRef.m_Rigidbody.UpdatePosition(new Vector2(movePacket.posX, movePacket.posY));
+				playerRef.m_Rigidbody.m_Body.LinearVelocity = new Vector2(movePacket.velX, movePacket.velY);
 			}
 		}
 	}
@@ -287,22 +297,38 @@ internal class NetworkManager
 		return entity;
 	}
 
-	//private void CreateNetworkPlayer(int id)
-	//{
-	//	PlayerData data = new PlayerData
-	//	{
-	//		health = 100.0f,
-	//		playerID = id,
-	//		x = 50.0f,
-	//		y = 50.0f
-	//	};
+	private void HandePlayerLogout(NETPlayerLogout logoutPacket)
+	{
+		GameScene gameScene = (GameScene)activeScene;
+		PlayerEntity entity = gameScene.GetPlayers().ElementAt(logoutPacket.playerID).Value;
+		if(entity.GetID() == playerID)
+		{
+			TCPSendMessage(new NETPlayerLogout(playerID));
+			gameScene.EndGame();
+		}
+		if(entity == null) { return; }
+		lock (entity)
+		{
+			entity.m_GameObject.Destroy();
+		}
+	}
 
-	//	Transform pos = new Transform(new Vector2(data.x, data.y));
+    //private void CreateNetworkPlayer(int id)
+    //{
+    //	PlayerData data = new PlayerData
+    //	{
+    //		health = 100.0f,
+    //		playerID = id,
+    //		x = 50.0f,
+    //		y = 50.0f
+    //	};
 
-	//	PlayerGO newPlayer = GameObject.Instantiate<PlayerGO>(activeScene, pos);
+    //	Transform pos = new Transform(new Vector2(data.x, data.y));
 
-	//	newPlayer.AddComponent(new PlayerEntity(newPlayer));
-	//	newPlayer.AddComponent(new PlayerNetwork(newPlayer, data));
+    //	PlayerGO newPlayer = GameObject.Instantiate<PlayerGO>(activeScene, pos);
 
-	//}
+    //	newPlayer.AddComponent(new PlayerEntity(newPlayer));
+    //	newPlayer.AddComponent(new PlayerNetwork(newPlayer, data));
+
+    //}
 }

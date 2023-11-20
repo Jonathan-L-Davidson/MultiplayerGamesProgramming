@@ -12,6 +12,9 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public int playerID;
         public float x;
         public float y;
+        public float velX;
+        public float velY;
+        public float rotation;
         public string spriteID;
         public float health;
         public bool isPlaying;
@@ -116,6 +119,10 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<NETPlayerCreate>(root.GetRawText(), options);
                     }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERLOGOUT)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerLogout>(root.GetRawText(), options);
+                    }
                 }
             }
 
@@ -185,6 +192,11 @@ namespace Multiplayer_Games_Programming_Packet_Library
         public float posX;
         [JsonPropertyName("PosY")]
         public float posY;
+        
+        [JsonPropertyName("VelX")]
+        public float velX;
+        [JsonPropertyName("VelY")]
+        public float velY;
 
         [JsonPropertyName("PlayerID")]
         public int playerID;
@@ -194,7 +206,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
             m_type = PacketType.PLAYERMOVE;
         }
 
-        public NETPlayerMove(Vector2 input, Vector2 position, int playerID)
+        public NETPlayerMove(Vector2 input, Vector2 position, Vector2 velocity, int playerID)
         {
             m_type = PacketType.PLAYERMOVE;
             this.x = input.X;
@@ -202,6 +214,9 @@ namespace Multiplayer_Games_Programming_Packet_Library
             
             this.posX = position.X;
             this.posY = position.Y;
+
+            this.velX = velocity.X;
+            this.velY = velocity.Y;
 
             this.playerID = playerID;
 

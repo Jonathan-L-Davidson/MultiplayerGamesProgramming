@@ -131,6 +131,12 @@ namespace Multiplayer_Games_Programming_Framework
 			}
 		}
 
+		public void EndGame()
+		{
+			m_GameModeState = GameModeState.ENDING;
+
+		}
+
 		public Dictionary<int, PlayerEntity> GetPlayers() { return m_players; }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Multiplayer_Games_Programming_Framework.Core;
+using System;
 
 namespace Multiplayer_Games_Programming_Framework
 {
@@ -63,6 +64,12 @@ namespace Multiplayer_Games_Programming_Framework
             m_SpriteBatch.End();
             
             base.Draw(gameTime);
+        }
+
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            NetworkManager.m_Instance.Logout();
+            base.OnExiting(sender, args);
         }
     }
 }

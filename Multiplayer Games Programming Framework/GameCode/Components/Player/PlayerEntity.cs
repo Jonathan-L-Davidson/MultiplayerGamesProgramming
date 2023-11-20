@@ -19,6 +19,7 @@ namespace Multiplayer_Games_Programming_Framework
         public Vector2 playerInput;
 
         public float m_Speed { get; private set; }
+        public float m_drag { get; private set; }
         public float m_maxSpeed { get; private set; }
         public  Rigidbody m_Rigidbody { get; private set; }
         public Vector2 m_movementLoop { get; private set; }
@@ -28,6 +29,7 @@ namespace Multiplayer_Games_Programming_Framework
         public PlayerEntity(GameObject gameObject, int playerID) : base(gameObject)
         {
             m_Speed = 75;
+            m_drag = 7.5f;
             health = 100.0f;
             this.playerID = playerID;
         }
@@ -41,6 +43,7 @@ namespace Multiplayer_Games_Programming_Framework
         public void GetRigidbody()
         {
             m_Rigidbody = m_GameObject.GetComponent<Rigidbody>();
+            m_Rigidbody.m_Body.LinearDamping = m_drag;
         }
 
         protected override void Update(float deltaTime)
@@ -79,6 +82,9 @@ namespace Multiplayer_Games_Programming_Framework
             data.health = this.health;
             data.x = m_Transform.Position.X;
             data.y = m_Transform.Position.Y;
+            data.velX = m_Rigidbody.m_Body.LinearVelocity.X;
+            data.velY = m_Rigidbody.m_Body.LinearVelocity.Y;
+            data.rotation = m_Transform.Rotation;
             data.spriteID = spriteState;
             data.isPlaying = true;
             return data;

@@ -51,14 +51,18 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
         }
         private void UpdateNetworkMovement()
         {
-            System.Numerics.Vector2 loop, position;
+            System.Numerics.Vector2 loop, position, velocity;
             loop.X = player.playerInput.X;
             loop.Y = player.playerInput.Y;
 
             position.X = player.m_GameObject.m_Transform.Position.X;
             position.Y = player.m_GameObject.m_Transform.Position.Y;
 
-            NETPlayerMove movePacket = new NETPlayerMove(loop, position, player.playerID);
+            Rigidbody rb = player.m_GameObject.GetComponent<Rigidbody>();
+            velocity.X = rb.m_Body.LinearVelocity.X;
+            velocity.Y = rb.m_Body.LinearVelocity.Y;
+
+            NETPlayerMove movePacket = new NETPlayerMove(loop, position, velocity, player.playerID);
             NetworkManager.m_Instance.UDPSendMessage(movePacket);
         }
 

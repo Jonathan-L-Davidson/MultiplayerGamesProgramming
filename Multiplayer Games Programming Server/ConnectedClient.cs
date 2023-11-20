@@ -46,7 +46,7 @@ namespace Multiplayer_Games_Programming_Server
             
             m_UdpSender = new UdpClient(endPoint);
 
-            m_RsaProvider = new RSACryptoServiceProvider(1024); //init the service and set the size of the keys (note the higher the value the stronger the encryption but it is slower)
+            m_RsaProvider = new RSACryptoServiceProvider(2048); //init the service and set the size of the keys (note the higher the value the stronger the encryption but it is slower)
             m_serverPublicKey = m_RsaProvider.ExportParameters(false); //false provides the public key
             m_serverPrivateKey = m_RsaProvider.ExportParameters(true); //true provides the private key
 
@@ -63,7 +63,26 @@ namespace Multiplayer_Games_Programming_Server
             m_netWriter.Close();
         }
 
-		public string ReadTCP()
+        public void UpdateTransform(NETPlayerUpdate update)
+        {
+            lock (this)
+            {
+                m_playerData.x = update.data.x;
+                m_playerData.y = update.data.y;
+            }
+        }
+        public void UpdateTransform(NETPlayerMove update)
+        {
+            lock (this)
+            {
+                m_playerData.x = update.posX;
+                m_playerData.y = update.posY;
+                m_playerData.velX = update.velX;
+                m_playerData.velY = update.velY;
+            }
+        }
+
+        public string ReadTCP()
 		{
             try
             {

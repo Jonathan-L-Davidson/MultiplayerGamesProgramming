@@ -129,7 +129,6 @@ namespace Multiplayer_Games_Programming_Server
         {
             if (packet == null) { return; };
 
-
             switch (packet.m_type)
             {
                 case PacketType.ENCRYPTED:
@@ -152,6 +151,7 @@ namespace Multiplayer_Games_Programming_Server
                     break;
                 case PacketType.PLAYERMOVE:
                     NETPlayerMove move = (NETPlayerMove)packet;
+                    m_Clients[move.playerID].UpdateTransform(move);
                     RelayPacket(move, move.playerID);
                     break;
                 case PacketType.PLAYERPLAY:
@@ -165,6 +165,7 @@ namespace Multiplayer_Games_Programming_Server
                     break;
                 case PacketType.PLAYERUPDATE:
                     NETPlayerUpdate update = (NETPlayerUpdate)packet;
+                    m_Clients[update.data.playerID].UpdateTransform(update);
                     RelayPacket(update);
                     break;
                 case PacketType.PLAYERLOGOUT:
@@ -268,9 +269,13 @@ namespace Multiplayer_Games_Programming_Server
             lock (m_Clients) {
                 foreach(ConnectedClient connectedClient in m_Clients.Values)
                 {
+                    if(connectedClient.GetID() == client.GetID())
+                    {
+                        continue;
+                    }
                     if (connectedClient.IsPlaying())
                     {
-                        NETPlayerUpdate updatePlayer = new NETPlayerUpdate(connectedClient.GetData());
+                        NETPlayerCreate updatePlayer = new NETPlayerCreate(connectedClient.GetData());
                         client.Send(updatePlayer);
                     }
                 }
