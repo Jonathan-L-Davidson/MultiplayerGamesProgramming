@@ -37,6 +37,21 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
             if (Keyboard.GetState().IsKeyDown(Keys.A)) { input.X = -1; }    // Left
             if (Keyboard.GetState().IsKeyDown(Keys.S)) { input.Y = 1; }     // Down
             if (Keyboard.GetState().IsKeyDown(Keys.D)) { input.X = 1; }     // Right
+            
+            if(Mouse.GetState().LeftButton == ButtonState.Pressed)
+            {
+                float x, y;
+                MouseState MS = Mouse.GetState();
+                x = MS.X;
+                y = MS.Y;
+
+                Vector2 dir = new Vector2(x - m_Transform.Position.X, y - m_Transform.Position.Y);
+                dir.Normalize();
+
+                PlayerEntity PE = m_GameObject.GetComponent<PlayerEntity>();
+                PE.Shoot(dir);
+
+            }
 
             if (input != player.playerInput)
             {

@@ -25,12 +25,14 @@ namespace Multiplayer_Games_Programming_Framework
         public Vector2 m_movementLoop { get; private set; }
 
         public float health;
+        public float damage;
 
         public PlayerEntity(GameObject gameObject, int playerID) : base(gameObject)
         {
             m_Speed = 75;
             m_drag = 7.5f;
             health = 100.0f;
+            damage = 10.0f;
             this.playerID = playerID;
         }
 
@@ -94,7 +96,7 @@ namespace Multiplayer_Games_Programming_Framework
             SetMovementLoop(playerInput);
         }
 
-        public void TakeDamage(int damage, int attacker)
+        public void TakeDamage(float damage, int attackerID)
         {
             lock (this)
             {
@@ -103,5 +105,14 @@ namespace Multiplayer_Games_Programming_Framework
             }
         }
 
+
+        public void Shoot(Vector2 dir)
+        {
+            BulletGO bullet = GameObject.Instantiate<BulletGO>(m_GameObject.m_Scene, new Transform(new Vector2(m_Transform.Position.X, m_Transform.Position.Y)));
+            bullet.playerID = playerID;
+            bullet.damage = damage;
+            bullet.dir = dir;
+            bullet.Go();
+        }
     }
 }
