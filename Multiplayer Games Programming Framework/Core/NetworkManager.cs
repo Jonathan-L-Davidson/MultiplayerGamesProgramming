@@ -109,7 +109,8 @@ internal class NetworkManager
 	public void Logout()
 	{
 		TCPSendMessage(new NETPlayerLogout(playerID));
-	}
+        m_tcpClient.Close();
+    }
 	public void Run()
 	{
 		Thread TcpThread = new Thread(new ThreadStart(TcpProcessServerResponse));
@@ -127,7 +128,13 @@ internal class NetworkManager
 			{
 				string msg = m_netReader.ReadLine();
 
-				Debug.WriteLine($"TCP Message recieved: {msg}");
+				Debug.WriteLine($"{playerID} | TCP Message recieved: {msg}");
+				if( msg == null)
+				{ 
+					Debug.WriteLine("Unknown message recieved!");
+					Logout();
+					continue;
+				}
 				Packet packet = DeserialisePacket(msg);
 
 				HandlePacket(packet);
@@ -306,12 +313,14 @@ internal class NetworkManager
 			TCPSendMessage(new NETPlayerLogout(playerID));
 			gameScene.EndGame();
 		}
-		if(entity == null) { return; }
+		if(entity.m_GameObject == null) { return; }
 		lock (entity)
 		{
 			entity.m_GameObject.Destroy();
 		}
+		
 	}
+
 
     //private void CreateNetworkPlayer(int id)
     //{

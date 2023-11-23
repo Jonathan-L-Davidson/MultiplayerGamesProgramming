@@ -170,6 +170,7 @@ namespace Multiplayer_Games_Programming_Server
                     break;
                 case PacketType.PLAYERLOGOUT:
                     NETPlayerLogout logout = (NETPlayerLogout)packet;
+                    Console.WriteLine($"Player {logout.playerID} logged out.");
                     LogoutClient(m_Clients[logout.playerID]);
                     break;
                 default:
@@ -179,14 +180,15 @@ namespace Multiplayer_Games_Programming_Server
             }
         }
 
-        private void LogoutClient(ConnectedClient client)
+        private void LogoutClient(ConnectedClient? client)
         {
             if (client != null)
             {
-                lock (client)
+                ConnectedClient C = client;
+                lock (C)
                 {
-                    int id = client.GetID();
-                    client.Logout();
+                    int id = C.GetID();
+                    C.Logout();
 
                     NETPlayerLogout logoutPacket = new NETPlayerLogout(id);
                     RelayPacket(logoutPacket);
@@ -194,7 +196,7 @@ namespace Multiplayer_Games_Programming_Server
                     {
                         m_Clients.Remove(id, out client);
                     }
-                    client?.Close();
+                    C?.Close();
                 }
             }
         }

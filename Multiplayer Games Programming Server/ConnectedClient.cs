@@ -104,6 +104,7 @@ namespace Multiplayer_Games_Programming_Server
 
 		public void Send(Packet packet, bool isUDP = false, bool encryption = true)
 		{
+            if (!active) return;
             try
             {
                 if (!isUDP)
@@ -170,6 +171,8 @@ namespace Multiplayer_Games_Programming_Server
             lock (this)
             {
                 SetPlaying(false);
+                active = false;
+                Send(new NETPlayerLogout(GetID()));
             }
         }
     }
