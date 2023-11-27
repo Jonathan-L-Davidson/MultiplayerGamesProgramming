@@ -73,7 +73,7 @@ namespace Multiplayer_Games_Programming_Framework
             PlayerEntity PE = player.GetComponent<PlayerEntity>();
             if(PE.GetID() == owner) { return; }
             PE.TakeDamage(damage);
-            //NetworkManager.m_Instance.UDPSendMessage(new NETHitRegister(damage, PE.GetID(), owner));
+            NetworkManager.m_Instance.UDPSendMessage(new NETHitRegister(damage, PE.GetID(), owner));
         }
     }
 }

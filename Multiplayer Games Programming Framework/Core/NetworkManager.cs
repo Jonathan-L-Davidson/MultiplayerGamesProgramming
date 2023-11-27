@@ -287,8 +287,6 @@ internal class NetworkManager
 			return;
 		}
 
-		// Set data from playerUpdate to player, using a lock to prevent any conflict in data.
-		
 	}
 
 	private PlayerEntity CreateNetworkPlayer(PlayerData data)
@@ -316,7 +314,7 @@ internal class NetworkManager
 	private void HandePlayerLogout(NETPlayerLogout logoutPacket)
 	{
 		GameScene gameScene = (GameScene)activeScene;
-		PlayerEntity entity = gameScene.GetPlayers().ElementAt(logoutPacket.playerID).Value;
+		PlayerEntity entity = gameScene.GetPlayers()[logoutPacket.playerID];
 		if(entity.GetID() == playerID)
 		{
 			TCPSendMessage(new NETPlayerLogout(playerID));
@@ -333,7 +331,7 @@ internal class NetworkManager
 	private void HandlePlayerHit(NETHitRegister hitReg)
 	{
         GameScene gameScene = (GameScene)activeScene;
-        PlayerEntity entity = gameScene.GetPlayers().ElementAt(hitReg.victimID).Value;
+        PlayerEntity entity = gameScene.GetPlayers()[hitReg.victimID];
 
 		Debug.WriteLine($"Player {hitReg.victimID} gets hit by Player {hitReg.attackerID} for {hitReg.damage} damage!");
 		entity.TakeDamage(hitReg.damage);
@@ -343,7 +341,7 @@ internal class NetworkManager
     private void HandlePlayerShoot(NETPlayerShoot shoot)
 	{
         GameScene gameScene = (GameScene)activeScene;
-        PlayerEntity entity = gameScene.GetPlayers().ElementAt(shoot.playerID).Value;
+        PlayerEntity entity = gameScene.GetPlayers()[shoot.playerID];
 		entity.Shoot(new Vector2(shoot.dirX, shoot.dirY));
     }
 

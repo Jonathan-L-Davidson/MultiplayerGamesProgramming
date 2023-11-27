@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Multiplayer_Games_Programming_Framework.Core;
 using Multiplayer_Games_Programming_Packet_Library;
 using Multiplayer_Games_Programming_Framework.GameCode.Components.Player;
+using System.Diagnostics;
 
 namespace Multiplayer_Games_Programming_Framework
 {
@@ -104,6 +105,7 @@ namespace Multiplayer_Games_Programming_Framework
             lock (this)
             {
                 health -= damage;
+                Debug.WriteLineIf((GetID() == NetworkManager.m_Instance.playerID), $"Player {NetworkManager.m_Instance.playerID} took {damage} damage! Health is now at: {health}");
             }
         }
 

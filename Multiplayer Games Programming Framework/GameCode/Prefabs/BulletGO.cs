@@ -26,7 +26,7 @@ internal class BulletGO : GameObject
         rb.m_Body.IgnoreGravity = true;
         rb.m_Body.FixedRotation = true;
 
-		Vector2 offsetSpawn = new Vector2(m_Transform.Position.X + (dir.X * (sr.m_Size.X * 2)), m_Transform.Position.Y + (dir.Y * (sr.m_Size.Y * 2)));
+		Vector2 offsetSpawn = new Vector2(m_Transform.Position.X + (dir.X * (sr.m_Size.Y * 2.5f)), m_Transform.Position.Y + (dir.Y * (sr.m_Size.Y * 2.5f)));
 		rb.UpdatePosition(offsetSpawn);
     }
 
@@ -41,7 +41,7 @@ internal class BulletGO : GameObject
 		}
 		else
 		{
-            rb.CreateRectangle(sr.m_Size.X, sr.m_Size.Y, 0.0f, 0.0f, Vector2.Zero, Constants.GetCategoryByName("Bullet"), Constants.GetCategoryByName("Player"));
+            rb.CreateRectangle(sr.m_Size.X, sr.m_Size.Y, 0.0f, 0.0f, Vector2.Zero, Constants.GetCategoryByName("Bullet"), Constants.GetCategoryByName("Player") | Constants.GetCategoryByName("Shootable"));
         }
     }
 

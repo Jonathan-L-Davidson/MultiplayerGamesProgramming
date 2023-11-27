@@ -56,7 +56,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
 
                     PlayerEntity PE = m_GameObject.GetComponent<PlayerEntity>();
                     PE.Shoot(dir, true);
-                    NetworkManager.m_Instance.TCPSendMessage(new NETPlayerShoot(dir.X, dir.Y, PE.GetID()));
+                    NetworkManager.m_Instance.UDPSendMessage(new NETPlayerShoot(dir.X, dir.Y, NetworkManager.m_Instance.playerID));
                     bulletShot = true;
                 }
             }
