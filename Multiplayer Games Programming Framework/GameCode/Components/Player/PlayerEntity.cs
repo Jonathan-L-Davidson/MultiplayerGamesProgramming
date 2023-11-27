@@ -29,7 +29,7 @@ namespace Multiplayer_Games_Programming_Framework
 
         public PlayerEntity(GameObject gameObject, int playerID) : base(gameObject)
         {
-            m_Speed = 75;
+            m_Speed = 125;
             m_drag = 7.5f;
             health = 100.0f;
             damage = 10.0f;
@@ -51,8 +51,11 @@ namespace Multiplayer_Games_Programming_Framework
         protected override void Update(float deltaTime)
         {
             Vector2 Movement = m_Transform.Right * this.m_movementLoop.X + m_Transform.Up * this.m_movementLoop.Y;
-            m_Rigidbody.m_Body.ApplyLinearImpulse(Movement * m_Speed * deltaTime);
-            UpdateMovement();
+            if (m_Rigidbody != null)
+            {
+                m_Rigidbody.m_Body.ApplyLinearImpulse(Movement * m_Speed * deltaTime);
+                UpdateMovement();
+            }
         }
 
         public void SetMovementLoop(Vector2 loop)
@@ -96,22 +99,22 @@ namespace Multiplayer_Games_Programming_Framework
             SetMovementLoop(playerInput);
         }
 
-        public void TakeDamage(float damage, int attackerID)
+        public void TakeDamage(float damage)
         {
             lock (this)
             {
                 health -= damage;
-                //NetworkManager.m_Instance.TCPSendMessage(new NETHitRegister(damage, attacker));
             }
         }
 
 
-        public void Shoot(Vector2 dir)
+        public void Shoot(Vector2 dir, bool authority = false)
         {
             BulletGO bullet = GameObject.Instantiate<BulletGO>(m_GameObject.m_Scene, new Transform(new Vector2(m_Transform.Position.X, m_Transform.Position.Y)));
             bullet.playerID = playerID;
             bullet.damage = damage;
             bullet.dir = dir;
+            bullet.GetComponent<BulletController>().authority = authority;
             bullet.Go();
         }
     }

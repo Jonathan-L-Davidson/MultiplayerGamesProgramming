@@ -12,6 +12,7 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
 {
     internal class PlayerController : Component
     {
+        bool bulletShot = false;
         PlayerEntity player;
         public PlayerController(GameObject gameObject) : base(gameObject)
         {
@@ -31,26 +32,36 @@ namespace Multiplayer_Games_Programming_Framework.GameCode.Components.Player
 
         private void CheckInput()
         {
+            GameScene gameScene = (GameScene)m_GameObject.m_Scene;
+            if (!gameScene.manager.m_Game.IsActive) { return; }
             Vector2 input = Vector2.Zero;
 
             if (Keyboard.GetState().IsKeyDown(Keys.W)) { input.Y = -1; }    // Up
             if (Keyboard.GetState().IsKeyDown(Keys.A)) { input.X = -1; }    // Left
             if (Keyboard.GetState().IsKeyDown(Keys.S)) { input.Y = 1; }     // Down
             if (Keyboard.GetState().IsKeyDown(Keys.D)) { input.X = 1; }     // Right
-            
+
+
             if(Mouse.GetState().LeftButton == ButtonState.Pressed)
             {
-                float x, y;
-                MouseState MS = Mouse.GetState();
-                x = MS.X;
-                y = MS.Y;
+                if (!bulletShot)
+                {
+                    float x, y;
+                    MouseState MS = Mouse.GetState();
+                    x = MS.X;
+                    y = MS.Y;
 
-                Vector2 dir = new Vector2(x - m_Transform.Position.X, y - m_Transform.Position.Y);
-                dir.Normalize();
+                    Vector2 dir = new Vector2(x - m_Transform.Position.X, y - m_Transform.Position.Y);
+                    dir.Normalize();
 
-                PlayerEntity PE = m_GameObject.GetComponent<PlayerEntity>();
-                PE.Shoot(dir);
-
+                    PlayerEntity PE = m_GameObject.GetComponent<PlayerEntity>();
+                    PE.Shoot(dir, true);
+                    bulletShot = true;
+                }
+            }
+            else
+            {
+                bulletShot = false;
             }
 
             if (input != player.playerInput)

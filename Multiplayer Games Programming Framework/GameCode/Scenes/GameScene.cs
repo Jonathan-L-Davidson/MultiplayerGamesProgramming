@@ -14,6 +14,8 @@ namespace Multiplayer_Games_Programming_Framework
 {
 	internal class GameScene : Scene
 	{
+		public SceneManager manager { get; private set; }
+
 		List<GameObject> m_GameObjects = new();
 
 		Dictionary<int, PlayerEntity> m_players = new();
@@ -27,11 +29,12 @@ namespace Multiplayer_Games_Programming_Framework
 		
 		GameModeState m_GameModeState;
 
-		float m_GameTimer;
+		public float m_GameTimer;
 
 		public GameScene(SceneManager manager) : base(manager)
 		{
 			m_GameModeState = GameModeState.AWAKE;
+			this.manager = manager;
 			m_players = new();
 		}
 

@@ -41,6 +41,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         OBJUPDATE,
         PLAYERLOGOUT,
         ENCRYPTED,
+        PLAYERHIT,
     }
 
     #region "Packet"
@@ -359,4 +360,34 @@ namespace Multiplayer_Games_Programming_Packet_Library
 
     }
     #endregion
+
+    #region "Player Hit"
+    public class NETHitRegister : Packet
+    {
+        [JsonPropertyName("Damage")]
+        public float damage;
+
+        [JsonPropertyName("Attacked Victim")]
+        public int victimID;
+
+        [JsonPropertyName("Attacker")]
+        public int attackerID;
+
+
+        public NETHitRegister()
+        {
+            m_type = PacketType.PLAYERHIT;
+        }
+
+        public NETHitRegister(float damage, int victimID, int attackerID)
+        {
+            m_type = PacketType.PLAYERHIT;
+            this.damage = damage;
+            this.victimID = victimID;
+            this.attackerID = attackerID;
+        }
+
+    }
+    #endregion
+
 }

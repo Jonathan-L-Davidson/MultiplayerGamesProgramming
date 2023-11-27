@@ -45,9 +45,13 @@ namespace Multiplayer_Games_Programming_Framework
 					return Category.Cat1;
 				case "Ball":
 					return Category.Cat2;
-				case "Wall":
-					return Category.Cat3;
-			}
+                case "Wall":
+                    return Category.Cat3;
+                case "Bullet":
+                    return Category.Cat4;
+                case "Shootable":
+                    return Category.Cat5;
+            }
 
 			Debug.WriteLine("Category not found: " + name + ". Returning Category.None");
 			return Category.None;

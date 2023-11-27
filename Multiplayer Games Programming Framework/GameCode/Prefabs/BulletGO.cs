@@ -6,10 +6,11 @@ namespace Multiplayer_Games_Programming_Framework;
 
 internal class BulletGO : GameObject
 {
-	public float m_speed = 2.0f;
+	public float m_speed = 12.0f;
 	public int playerID;
 	public float damage;
 	public Vector2 dir;
+
 	public BulletGO(Scene scene, Transform transform) : base(scene, transform)
 	{
 		SpriteRenderer sr = AddComponent(new SpriteRenderer(this, "bullet"));

@@ -16,6 +16,7 @@ internal class PlayerGO : GameObject
         Rigidbody rb = AddComponent(new Rigidbody(this, BodyType.Dynamic, 0.1f, sr.m_Size / 2));
         rb.m_Body.IgnoreGravity = true;
         rb.m_Body.FixedRotation = true;
+        rb.CreateCircule(Math.Max(sr.m_Size.X, sr.m_Size.Y) / 2, 0.0f, 0.0f, Vector2.Zero, Constants.GetCategoryByName("Player"), Constants.GetCategoryByName("Bullet") | Constants.GetCategoryByName("Wall"));
         rb.UpdatePosition(transform.Position);
 
         entity.GetRigidbody();
