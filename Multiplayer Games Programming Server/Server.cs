@@ -97,7 +97,7 @@ namespace Multiplayer_Games_Programming_Server
                 string recieved = client.ReadTCP();
                 if (recieved != null && recieved.Length > 0)
                 {
-                    Console.WriteLine($"Recieved Packet: {recieved}");
+                    //Console.WriteLine($"Recieved Packet: {recieved}");
                     Packet? packet = Packet.Deserialise(recieved);
                     if (packet != null)
                     {
@@ -152,7 +152,7 @@ namespace Multiplayer_Games_Programming_Server
                 case PacketType.PLAYERMOVE:
                     NETPlayerMove move = (NETPlayerMove)packet;
                     m_Clients[move.playerID].UpdateTransform(move);
-                    RelayPacket(move, move.playerID);
+                    RelayPacket(move, originID:move.playerID);
                     break;
                 case PacketType.PLAYERPLAY:
                     NETPlayerPlay start = (NETPlayerPlay)packet;
@@ -161,7 +161,7 @@ namespace Multiplayer_Games_Programming_Server
                     {
                         SceneSync(m_Clients[start.playerID]);
                     }
-                    RelayPacket(new NETPlayerCreate(client.GetData()), start.playerID); // TODO create netplayercreate again, make an new handler
+                    RelayPacket(new NETPlayerCreate(client.GetData()), originID:start.playerID); // TODO create netplayercreate again, make an new handler
                     break;
                 case PacketType.PLAYERUPDATE:
                     NETPlayerUpdate update = (NETPlayerUpdate)packet;
@@ -172,6 +172,14 @@ namespace Multiplayer_Games_Programming_Server
                     NETPlayerLogout logout = (NETPlayerLogout)packet;
                     Console.WriteLine($"Player {logout.playerID} logged out.");
                     LogoutClient(m_Clients[logout.playerID]);
+                    break;
+                case PacketType.PLAYERHIT:
+                    NETHitRegister hitReg = (NETHitRegister)packet;
+                    RelayPacket(hitReg, originID: hitReg.attackerID);
+                    break;
+                case PacketType.PLAYERSHOOT:
+                    NETPlayerShoot shootPacket = (NETPlayerShoot)packet;
+                    RelayPacket(shootPacket, originID:shootPacket.playerID);
                     break;
                 default:
                     Console.WriteLine($"ERROR: PacketType missing, was: {packet.m_type}");

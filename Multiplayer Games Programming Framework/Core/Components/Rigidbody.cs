@@ -119,8 +119,11 @@ namespace Multiplayer_Games_Programming_Framework
 
 		override protected void Update(float deltaTime)
 		{
-			m_Transform.Position = new Vector2(Constants.PhysicstoScreen(m_Body.Position.X), Constants.PhysicstoScreen(m_Body.Position.Y));
-			m_Transform.Rotation = m_Body.Rotation;
+			if (m_Transform != null)
+			{
+				m_Transform.Position = new Vector2(Constants.PhysicstoScreen(m_Body.Position.X), Constants.PhysicstoScreen(m_Body.Position.Y));
+				m_Transform.Rotation = m_Body.Rotation;
+			}
 		}
 
 		public void UpdatePosition(Vector2 position) 

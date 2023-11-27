@@ -8,7 +8,7 @@ namespace Multiplayer_Games_Programming_Framework
     internal abstract class Component
     {
         public GameObject m_GameObject { get; private set; }
-        public Transform m_Transform { get { return m_GameObject.m_Transform; } }
+        public Transform m_Transform { get { return m_GameObject?.m_Transform; } }
 
         public bool m_Enabled = true;
 

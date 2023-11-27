@@ -115,6 +115,8 @@ namespace Multiplayer_Games_Programming_Framework
             bullet.damage = damage;
             bullet.dir = dir;
             bullet.GetComponent<BulletController>().authority = authority;
+            bullet.Init();
+            bullet.CreateHitbox();
             bullet.Go();
         }
     }

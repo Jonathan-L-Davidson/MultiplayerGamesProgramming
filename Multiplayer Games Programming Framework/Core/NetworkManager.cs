@@ -162,7 +162,7 @@ internal class NetworkManager
 			}
 			catch (SocketException e)
 			{
-				Console.WriteLine("Client UDP Read Method exception: " + e.Message);
+                Debug.WriteLine("Client UDP Read Method exception: " + e.Message);
 			}
 		}
     }
@@ -229,6 +229,14 @@ internal class NetworkManager
                 NETPlayerLogout logoutPacket = (NETPlayerLogout)packet;
                 HandePlayerLogout(logoutPacket);
                 break;
+			case (PacketType.PLAYERHIT):
+				NETHitRegister hitReg = (NETHitRegister)packet;
+				HandlePlayerHit(hitReg);
+				break;
+			case (PacketType.PLAYERSHOOT):
+				NETPlayerShoot shootingPacket = (NETPlayerShoot)packet;
+				HandlePlayerShoot(shootingPacket);
+				break;
         }
 	}
 
@@ -322,6 +330,22 @@ internal class NetworkManager
 		
 	}
 
+	private void HandlePlayerHit(NETHitRegister hitReg)
+	{
+        GameScene gameScene = (GameScene)activeScene;
+        PlayerEntity entity = gameScene.GetPlayers().ElementAt(hitReg.victimID).Value;
+
+		Debug.WriteLine($"Player {hitReg.victimID} gets hit by Player {hitReg.attackerID} for {hitReg.damage} damage!");
+		entity.TakeDamage(hitReg.damage);
+
+    }
+
+    private void HandlePlayerShoot(NETPlayerShoot shoot)
+	{
+        GameScene gameScene = (GameScene)activeScene;
+        PlayerEntity entity = gameScene.GetPlayers().ElementAt(shoot.playerID).Value;
+		entity.Shoot(new Vector2(shoot.dirX, shoot.dirY));
+    }
 
     //private void CreateNetworkPlayer(int id)
     //{

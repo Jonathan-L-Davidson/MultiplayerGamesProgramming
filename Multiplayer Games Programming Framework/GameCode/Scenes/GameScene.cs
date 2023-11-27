@@ -104,8 +104,9 @@ namespace Multiplayer_Games_Programming_Framework
 		public override void Update(float deltaTime)
 		{
 			base.Update(deltaTime);
+			DelQueue();
 
-			m_GameTimer += deltaTime;
+            m_GameTimer += deltaTime;
 
 			switch (m_GameModeState)
 			{

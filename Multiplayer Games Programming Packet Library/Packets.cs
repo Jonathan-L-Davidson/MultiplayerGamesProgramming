@@ -42,6 +42,7 @@ namespace Multiplayer_Games_Programming_Packet_Library
         PLAYERLOGOUT,
         ENCRYPTED,
         PLAYERHIT,
+        PLAYERSHOOT,
     }
 
     #region "Packet"
@@ -124,6 +125,15 @@ namespace Multiplayer_Games_Programming_Packet_Library
                     {
                         return JsonSerializer.Deserialize<NETPlayerLogout>(root.GetRawText(), options);
                     }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERHIT)
+                    {
+                        return JsonSerializer.Deserialize<NETHitRegister>(root.GetRawText(), options);
+                    }
+                    if (typeProperty.GetByte() == (byte)PacketType.PLAYERSHOOT)
+                    {
+                        return JsonSerializer.Deserialize<NETPlayerShoot>(root.GetRawText(), options);
+                    }
+                    
                 }
             }
 
@@ -390,4 +400,30 @@ namespace Multiplayer_Games_Programming_Packet_Library
     }
     #endregion
 
+    #region "Player Shoot"
+    public class NETPlayerShoot : Packet
+    {
+        [JsonPropertyName("Dir X")]
+        public float dirX;
+        [JsonPropertyName("Dir Y")]
+        public float dirY;
+
+        [JsonPropertyName("ID")]
+        public int playerID;
+
+        public NETPlayerShoot()
+        {
+            m_type = PacketType.PLAYERSHOOT;
+        }
+
+        public NETPlayerShoot(float dirX, float dirY, int playerID)
+        {
+            m_type = PacketType.PLAYERSHOOT ;
+            this.dirX = dirX;
+            this.dirY = dirY;
+            this.playerID = playerID;
+        }
+
+    }
+    #endregion
 }

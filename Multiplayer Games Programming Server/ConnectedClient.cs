@@ -41,10 +41,8 @@ namespace Multiplayer_Games_Programming_Server
             if (socket == null) { throw new ArgumentNullException("socket missing"); }
 
             m_socket = (Socket)socket;
-            IPEndPoint? endPoint = m_socket.RemoteEndPoint as IPEndPoint;
-            if(endPoint == null) { throw new ArgumentNullException("No endpoint found!"); }
             
-            m_UdpSender = new UdpClient(endPoint);
+            m_UdpSender = new UdpClient();
 
             m_RsaProvider = new RSACryptoServiceProvider(2048); //init the service and set the size of the keys (note the higher the value the stronger the encryption but it is slower)
             m_serverPublicKey = m_RsaProvider.ExportParameters(false); //false provides the public key
@@ -121,7 +119,7 @@ namespace Multiplayer_Games_Programming_Server
             }
             catch (Exception ex)
             {
-                Console.WriteLine("ERROR: " + ex.Message);
+                Console.WriteLine("CONNECTEDCLIENT | ERROR: " + ex.Message);
                 Logout();
                 return;
             }

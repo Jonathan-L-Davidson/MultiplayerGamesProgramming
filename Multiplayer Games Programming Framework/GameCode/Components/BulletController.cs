@@ -38,11 +38,14 @@ namespace Multiplayer_Games_Programming_Framework
             {
                 m_GameObject.Destroy();
             }
-            
-            float rotateAngle = (float)Math.Atan2(-m_Rigidbody.m_Body.LinearVelocity.X, m_Rigidbody.m_Body.LinearVelocity.Y);
-            m_Rigidbody.m_Body.Rotation = rotateAngle / MathF.PI * 180;
 
-            base.Update(deltaTime);
+            if (m_Rigidbody != null)
+            {
+                float rotateAngle = (float)Math.Atan2(-m_Rigidbody.m_Body.LinearVelocity.X, m_Rigidbody.m_Body.LinearVelocity.Y);
+                m_Rigidbody.m_Body.Rotation = rotateAngle / MathF.PI * 180;
+
+                base.Update(deltaTime);
+            }
 
         }
 
@@ -56,6 +59,8 @@ namespace Multiplayer_Games_Programming_Framework
 
         protected override void OnCollisionEnter(Fixture sender, Fixture other, Contact contact)
         {
+            m_GameObject.m_Scene.QueueDel(m_GameObject);
+
             if (!authority) { return; }
             PlayerGO player = (PlayerGO)other.Body.Tag;
             if(player == null)
@@ -68,8 +73,7 @@ namespace Multiplayer_Games_Programming_Framework
             PlayerEntity PE = player.GetComponent<PlayerEntity>();
             if(PE.GetID() == owner) { return; }
             PE.TakeDamage(damage);
-            NetworkManager.m_Instance.UDPSendMessage(new NETHitRegister(damage, PE.GetID(), owner));
-            m_GameObject.Destroy();
+            //NetworkManager.m_Instance.UDPSendMessage(new NETHitRegister(damage, PE.GetID(), owner));
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Multiplayer_Games_Programming_Framework
 
 		protected SceneManager m_Manager;
         protected List<GameObject> m_GameObjects;
+        protected List<GameObject> _queuedDels; // After every game tick, delete this object.
 
         public string m_Name { get; private set; }
 
@@ -27,6 +28,7 @@ namespace Multiplayer_Games_Programming_Framework
             m_Manager = manager;
 
             m_GameObjects = new List<GameObject>();
+            _queuedDels = new List<GameObject>();
             m_Name = SceneName();
             m_World = CreateWorld();
         }
@@ -145,5 +147,21 @@ namespace Multiplayer_Games_Programming_Framework
         {
             onDirtyGameObject -= method;
         }
-	}
+
+        public void QueueDel(GameObject obj)
+        {
+            _queuedDels.Add(obj);
+        }
+
+        protected void DelQueue()
+        {
+            foreach(GameObject obj in _queuedDels)
+            {
+                lock (obj)
+                {
+                    obj.Destroy();
+                }
+            }
+        }
+    }
 }
