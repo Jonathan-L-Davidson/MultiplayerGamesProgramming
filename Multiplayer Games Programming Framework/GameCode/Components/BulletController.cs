@@ -57,12 +57,16 @@ namespace Multiplayer_Games_Programming_Framework
         protected override void OnCollisionEnter(Fixture sender, Fixture other, Contact contact)
         {
             if (!authority) { return; }
-            PlayerGO player = other.Body.Tag as PlayerGO;
+            PlayerGO player = (PlayerGO)other.Body.Tag;
             if(player == null)
             {
                 return;
             }
+
+            int debugID = NetworkManager.m_Instance.playerID;
+
             PlayerEntity PE = player.GetComponent<PlayerEntity>();
+            if(PE.GetID() == owner) { return; }
             PE.TakeDamage(damage);
             NetworkManager.m_Instance.UDPSendMessage(new NETHitRegister(damage, PE.GetID(), owner));
             m_GameObject.Destroy();

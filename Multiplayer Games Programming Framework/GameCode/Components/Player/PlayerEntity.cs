@@ -111,7 +111,7 @@ namespace Multiplayer_Games_Programming_Framework
         public void Shoot(Vector2 dir, bool authority = false)
         {
             BulletGO bullet = GameObject.Instantiate<BulletGO>(m_GameObject.m_Scene, new Transform(new Vector2(m_Transform.Position.X, m_Transform.Position.Y)));
-            bullet.playerID = playerID;
+            bullet.playerID = GetID();
             bullet.damage = damage;
             bullet.dir = dir;
             bullet.GetComponent<BulletController>().authority = authority;

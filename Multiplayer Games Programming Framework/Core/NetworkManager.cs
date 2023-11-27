@@ -290,10 +290,11 @@ internal class NetworkManager
 		trans.Position = pos;
 		
 		PlayerGO newPlayer = GameObject.Instantiate<PlayerGO>(activeScene, trans);
-
 		PlayerEntity entity = new PlayerEntity(newPlayer, data.playerID);
 
         newPlayer.AddComponent(entity);
+		newPlayer.Init();
+		newPlayer.SetCollision();
 
 		GameScene gameScene = (GameScene)activeScene;
 		if(gameScene == null) { return null; }

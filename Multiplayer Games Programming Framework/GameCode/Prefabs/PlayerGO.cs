@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using nkast.Aether.Physics2D.Dynamics;
 
@@ -8,7 +9,12 @@ internal class PlayerGO : GameObject
 {
     public PlayerGO(Scene scene, Transform transform) : base(scene, transform)
     {
-        PlayerEntity entity = AddComponent(new PlayerEntity(this, NetworkManager.m_Instance.playerID));
+        m_Transform = transform;
+    }
+
+    public void Init()
+    {
+        PlayerEntity entity = GetComponent<PlayerEntity>();
 
         SpriteRenderer sr = AddComponent(new SpriteRenderer(this, entity.spriteState));
         sr.m_DepthLayer = 0;
@@ -16,13 +22,22 @@ internal class PlayerGO : GameObject
         Rigidbody rb = AddComponent(new Rigidbody(this, BodyType.Dynamic, 0.1f, sr.m_Size / 2));
         rb.m_Body.IgnoreGravity = true;
         rb.m_Body.FixedRotation = true;
-        rb.CreateCircule(Math.Max(sr.m_Size.X, sr.m_Size.Y) / 2, 0.0f, 0.0f, Vector2.Zero, Constants.GetCategoryByName("Player"), Constants.GetCategoryByName("Bullet") | Constants.GetCategoryByName("Wall"));
-        rb.UpdatePosition(transform.Position);
-
+        rb.UpdatePosition(m_Transform.Position);
         entity.GetRigidbody();
-        
-        //rb.CreateCircule(Math.Max(sr.m_Size.X, sr.m_Size.Y) / 2, 0.0f, 0.0f, Vector2.Zero, Constants.GetCategoryByName("Ball"), Constants.GetCategoryByName("Player") | Constants.GetCategoryByName("Wall"));
+    }
 
-        //AddComponent(new BallControllerComponent(this));
+    public void SetCollision(bool localPlayer = false)
+    {
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        Rigidbody rb = GetComponent<Rigidbody>();
+
+        if (localPlayer)
+        {
+            rb.CreateCircule(Math.Max(sr.m_Size.X, sr.m_Size.Y) / 2, 0.0f, 0.0f, Vector2.Zero, Constants.GetCategoryByName("Player"), Constants.GetCategoryByName("Bullet") | Constants.GetCategoryByName("Wall"));
+        }
+        else
+        {
+            rb.CreateCircule(Math.Max(sr.m_Size.X, sr.m_Size.Y) / 2, 0.0f, 0.0f, Vector2.Zero, Constants.GetCategoryByName("Shootable"), Constants.GetCategoryByName("Bullet") | Constants.GetCategoryByName("Wall") | Constants.GetCategoryByName("Player"));
+        }
     }
 }
